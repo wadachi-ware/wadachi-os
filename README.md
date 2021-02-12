@@ -1,3 +1,5 @@
-# wadachi-template
+# wadachi-os
 
-UPDATE TITLE IN README AND Cargo.toml!!!
+RISC-V OS
+
+

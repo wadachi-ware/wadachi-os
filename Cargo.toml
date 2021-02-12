@@ -1,5 +1,5 @@
 [package]
-name = "wadachi-template"
+name = "wadachi-os"
 version = "0.1.0"
 authors = ["ikanago <28985004+ikanago@users.noreply.github.com>"]
 edition = "2018"
