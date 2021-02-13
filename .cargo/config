@@ -1,5 +1,5 @@
 [target.riscv64imac-unknown-none-elf]
-runner = "qemu-system-riscv64 -nographic -machine virt -bios none -kernel"
+runner = "qemu-system-riscv64 -nographic -machine virt -bios none -s -S -kernel"
 rustflags = [
 	"-C", "link-arg=-Tlinker.ld",
 ]

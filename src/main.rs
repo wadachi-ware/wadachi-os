@@ -5,24 +5,24 @@ use core::panic::PanicInfo;
 
 #[no_mangle]
 pub fn wadachi_start() -> ! {
-    loop {
+    let uart = 0x1000_0000 as *mut u8;
 
+    for c in b"hello wadashi-os".iter() {
+        unsafe {
+            *uart = *c as u8;
+        }
     }
+
+    loop {}
 }
 
 #[panic_handler]
 #[no_mangle]
 pub fn panic(_info: &PanicInfo) -> ! {
-    loop {
-
-    }
+    loop {}
 }
 
 #[no_mangle]
 pub fn abort() -> ! {
-    loop {
-    }
+    loop {}
 }
-
-
-
