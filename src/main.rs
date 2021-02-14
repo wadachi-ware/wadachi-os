@@ -2,19 +2,19 @@
 #![no_main]
 #![feature(custom_test_frameworks)]
 #![test_runner(test::test_runner)]
+#![reexport_test_harness_main = "test_entry"]
 
 pub mod stdio;
 pub mod test;
 
-use core::fmt::Write;
 use core::panic::PanicInfo;
-
-use stdio::UARTBuffer;
 
 #[no_mangle]
 pub fn wadachi_start() -> ! {
-    let mut buf: UARTBuffer = UARTBuffer::new(0x1000_0000 as *mut u8);
-    write!(buf, "Hello from wadachi-os").unwrap();
+    #[cfg(test)]
+    test_entry();
+
+    println!("Hello world");
 
     loop {}
 }
