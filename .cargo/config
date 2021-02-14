@@ -1,9 +1,14 @@
 [target.riscv64imac-unknown-none-elf]
-runner = "qemu-system-riscv64 -nographic -machine virt -bios none -s -S -kernel"
+runner = "qemu-system-riscv64 -nographic -machine virt -bios none -kernel"
 rustflags = [
 	"-C", "link-arg=-Tlinker.ld",
 ]
 
 [build]
 target = "riscv64imac-unknown-none-elf"
+
+[alias]
+gdbserver = "run -- -s -S"
+
+
 
