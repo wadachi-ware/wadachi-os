@@ -8,16 +8,16 @@ pub struct UARTBuffer {
 use core::fmt;
 use core::fmt::{Error, Write};
 
+const QEMU_UART_ADDRESS: *mut u8 = 0x1000_0000 as *mut u8;
+
 lazy_static! {
     pub static ref UART_BUF: Mutex<UARTBuffer> =
-        Mutex::new(UARTBuffer::new(0x1000_0000 as *mut u8));
+        Mutex::new(UARTBuffer::new(unsafe { &mut *QEMU_UART_ADDRESS }));
 }
 
 impl UARTBuffer {
-    pub fn new(address: *mut u8) -> Self {
-        Self {
-            address: unsafe { &mut *address },
-        }
+    pub fn new(address: &'static mut u8) -> Self {
+        Self { address }
     }
 }
 
