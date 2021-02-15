@@ -19,7 +19,7 @@ jobs:
     - name: Setup cargo toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly
+        toolchain: stable
         target: riscv64imac-unknown-none-elf
     - name: Build
       run: cargo build --verbose
