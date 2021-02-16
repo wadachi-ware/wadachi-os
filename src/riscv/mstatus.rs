@@ -5,6 +5,7 @@ use super::csr::CSRegister;
 #[allow(unused)]
 #[derive(Debug, PartialEq)]
 pub struct MStatus {
+    // see p21 in https://people.eecs.berkeley.edu/~krste/papers/riscv-privileged-v1.9.1.pdf
     value: usize,
 }
 
