@@ -32,12 +32,6 @@ impl MStatus {
     pub fn set_mpp(&mut self, mpp: MPP) {
         self.value.set_bits(11..=12, mpp as usize);
     }
-
-    #[allow(unused)]
-    unsafe fn set_zero() {
-        Self::write(Self { value: 0 });
-        assert_eq!(Self::read(), Self { value: 0 });
-    }
 }
 
 impl CSRegister for MStatus {
@@ -51,11 +45,17 @@ impl CSRegister for MStatus {
             value: internal_read(),
         }
     }
+    fn get_unset() -> Self {
+        Self { value: 0 }
+    }
 }
 
 #[test_case]
 fn mpp_write_test() {
-    let mut ms = MStatus { value: 0 };
+    unsafe {
+        MStatus::initialize();
+    }
+    let mut ms = MStatus::get_unset();
     ms.set_mpp(MPP::Supervisor);
 
     assert_eq!(ms.value, 0b100000000000);
@@ -70,7 +70,7 @@ fn mpp_write_test() {
 #[test_case]
 fn write_mstatus_test() {
     unsafe {
-        MStatus::set_zero();
+        MStatus::initialize();
     }
 
     let mut ms = MStatus::read();
@@ -79,14 +79,13 @@ fn write_mstatus_test() {
         MStatus::write(ms);
     }
 
-    ms = MStatus::read();
-    assert_eq!(ms.value, 0b1100000000000);
+    assert_eq!(MStatus::read().value, 0b1100000000000);
 }
 
 #[test_case]
 fn operate_mstatus_test() {
     unsafe {
-        MStatus::set_zero();
+        MStatus::initialize();
     }
 
     MStatus::operate(|mut old| {

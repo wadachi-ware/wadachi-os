@@ -1,16 +1,21 @@
-pub trait CSRegister {
+pub trait CSRegister
+where
+    Self: Sized,
+{
     /// write back after some operations
-    fn operate<F: Fn(Self) -> Self>(f: F)
-    where
-        Self: Sized,
-    {
+    fn operate<F: Fn(Self) -> Self>(f: F) {
         unsafe {
             Self::write(f(Self::read()));
         }
     }
+    unsafe fn initialize() {
+        // for tests
+        Self::write(Self::get_unset());
+    }
 
     unsafe fn write(_: Self);
     fn read() -> Self;
+    fn get_unset() -> Self;
 }
 
 #[allow(unused)]
