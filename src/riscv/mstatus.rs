@@ -2,7 +2,8 @@ use bit_field::BitField;
 
 use super::csr::CSRegister;
 
-#[derive(Debug)]
+#[allow(unused)]
+#[derive(Debug, PartialEq)]
 pub struct MStatus {
     value: usize,
 }
@@ -30,6 +31,12 @@ impl MStatus {
     #[allow(unused)]
     pub fn set_mpp(&mut self, mpp: MPP) {
         self.value.set_bits(11..=12, mpp as usize);
+    }
+
+    #[allow(unused)]
+    unsafe fn set_zero() {
+        Self::write(Self { value: 0 });
+        assert_eq!(Self::read(), Self { value: 0 });
     }
 }
 
@@ -62,6 +69,10 @@ fn mpp_write_test() {
 
 #[test_case]
 fn write_mstatus_test() {
+    unsafe {
+        MStatus::set_zero();
+    }
+
     let mut ms = MStatus::read();
     ms.set_mpp(MPP::Machine);
     unsafe {
@@ -70,4 +81,19 @@ fn write_mstatus_test() {
 
     ms = MStatus::read();
     assert_eq!(ms.value, 0b1100000000000);
+}
+
+#[test_case]
+fn operate_mstatus_test() {
+    unsafe {
+        MStatus::set_zero();
+    }
+
+    MStatus::operate(|mut old| {
+        old.set_mpp(MPP::Machine);
+
+        old
+    });
+
+    assert_eq!(MStatus::read().value, 0b1100000000000);
 }

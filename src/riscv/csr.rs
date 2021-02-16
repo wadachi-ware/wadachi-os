@@ -1,6 +1,6 @@
 pub trait CSRegister {
     /// write back after some operations
-    fn writes(f: fn(Self) -> Self)
+    fn operate<F: Fn(Self) -> Self>(f: F)
     where
         Self: Sized,
     {

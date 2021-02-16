@@ -12,8 +12,6 @@ mod supervisor;
 
 use machine::*;
 
-use riscv::mstatus::*;
-
 use core::panic::PanicInfo;
 
 #[panic_handler]
