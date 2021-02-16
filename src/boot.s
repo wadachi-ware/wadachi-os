@@ -7,12 +7,12 @@
 
 _start:
 	lla		sp, kernel_stack_end
-	j			wadachi_start
+	j			machine_start
 
 
 .bss
 .global kernel_stack
 kernel_stack:
-	.skip 2048
+	.skip 65536
 kernel_stack_end:
 
