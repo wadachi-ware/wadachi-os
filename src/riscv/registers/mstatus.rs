@@ -1,6 +1,6 @@
 use bit_field::BitField;
 
-use super::csr::CSRegister;
+use super::CSRegister;
 
 #[allow(unused)]
 #[derive(Debug, PartialEq)]

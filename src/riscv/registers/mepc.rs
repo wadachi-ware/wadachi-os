@@ -1,12 +1,12 @@
-use super::csr::CSRegister;
+use super::CSRegister;
 
-#[allow(unused)]
 #[derive(Debug, PartialEq)]
 pub struct MEPC {
     // see p42 in https://people.eecs.berkeley.edu/~krste/papers/riscv-privileged-v1.9.1.pdf
     value: usize,
 }
 impl MEPC {
+    #[allow(unused)]
     pub fn set(&mut self, addr: usize) {
         self.value = addr;
     }

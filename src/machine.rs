@@ -2,7 +2,14 @@
 pub mod stdio;
 pub mod test;
 
-use super::*;
+use super::{
+    riscv::registers::{
+        mepc::MEPC,
+        mstatus::{MStatus, MPP},
+        CSRegister,
+    },
+    supervisor::supervisor_start,
+};
 
 const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;
 // see http://www.katsuster.net/index.php?arg_act=cmd_show_diary&arg_date=20210203&arg_count_article=20
@@ -10,9 +17,22 @@ const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;
 #[no_mangle]
 pub fn machine_start() -> ! {
     #[cfg(test)]
-    test_entry();
+    crate::test_entry();
 
     println!("Hello Kernel!");
+    println!("In machine mode");
+
+    MStatus::operate(|mut old| {
+        old.set_mpp(MPP::Supervisor);
+
+        old
+    });
+
+    MEPC::operate(|mut old| {
+        old.set(supervisor_start as usize);
+
+        old
+    });
 
     shutdown(0);
 }
