@@ -34,10 +34,10 @@ fn write_mepc_test() {
         MEPC::initialize();
     }
     MEPC::operate(|mut old| {
-        old.set(0xdeadbeefcafebabe);
+        old.set(0xdeadbeef);
 
         old
     });
 
-    assert_eq!(MEPC::read().value, 0xdeadbeefcafebabe);
+    assert_eq!(MEPC::read().value, 0xdeadbeef);
 }

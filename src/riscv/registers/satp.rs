@@ -78,6 +78,4 @@ fn write_mode_test() {
     }
 
     assert_eq!(SATP::read().value, 1 << 31);
-
-    println!("{}", SATP::read().value);
 }

@@ -48,13 +48,20 @@ pub fn machine_start() -> ! {
     mret::mret();
 }
 
-pub fn shutdown(exit_code: u32) -> ! {
-    // valid exit code length is 9
+#[no_mangle]
+pub fn shutdown(exit_code: u16) -> ! {
+    use core::ptr::write_volatile;
 
-    use qemu_exit::QEMUExit;
+    let return_code: u32 = (exit_code as u32) << 16 | 0x3333;
 
-    // let qemu_exit_handler = qemu_exit::RISCV64::new(QEMU_VIRTIO_EXIT_ADDRESS);
-    // qemu_exit_handler.exit(exit_code);
+    unsafe {
+        // *(QEMU_VIRTIO_EXIT_ADDRESS as *mut u32) = exit_code;
+        write_volatile(QEMU_VIRTIO_EXIT_ADDRESS as *mut u32, return_code);
+    }
 
-    unreachable!();
+    loop {
+        unsafe {
+            llvm_asm!("wfi");
+        };
+    }
 }
