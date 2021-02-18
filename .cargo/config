@@ -9,6 +9,7 @@ target = "riscv32imac-unknown-none-elf"
 
 [alias]
 gdbserver = "run -- -s -S"
+gdbserver_release = "run --release -- -s -S"
 
 
 
