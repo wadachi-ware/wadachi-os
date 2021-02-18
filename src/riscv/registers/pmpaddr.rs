@@ -42,22 +42,11 @@ macro_rules! make_pmpaddr {
     };
 }
 
-make_pmpaddr!(0);
-make_pmpaddr!(1);
-make_pmpaddr!(2);
-make_pmpaddr!(3);
-make_pmpaddr!(4);
-make_pmpaddr!(5);
-make_pmpaddr!(6);
-make_pmpaddr!(7);
-make_pmpaddr!(8);
-make_pmpaddr!(9);
-make_pmpaddr!(10);
-make_pmpaddr!(11);
-make_pmpaddr!(12);
-make_pmpaddr!(13);
-make_pmpaddr!(14);
-make_pmpaddr!(15);
+use seq_macro::seq;
+
+seq!(N in 0..16 {
+    make_pmpaddr!(N);
+});
 
 #[test_case]
 fn write_method_test() {
@@ -86,19 +75,6 @@ macro_rules! make_pmpaddr_test {
     };
 }
 
-make_pmpaddr_test!(0);
-make_pmpaddr_test!(1);
-make_pmpaddr_test!(2);
-make_pmpaddr_test!(3);
-make_pmpaddr_test!(4);
-make_pmpaddr_test!(5);
-make_pmpaddr_test!(6);
-make_pmpaddr_test!(7);
-make_pmpaddr_test!(8);
-make_pmpaddr_test!(9);
-make_pmpaddr_test!(10);
-make_pmpaddr_test!(11);
-make_pmpaddr_test!(12);
-make_pmpaddr_test!(13);
-make_pmpaddr_test!(14);
-make_pmpaddr_test!(15);
+seq!(N in 0..16 {
+    make_pmpaddr_test!(N);
+});
