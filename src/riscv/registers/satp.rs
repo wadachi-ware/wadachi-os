@@ -17,6 +17,7 @@ pub enum MODE32 {
 
 impl SATP {
     #[allow(unused)]
+    #[inline]
     pub fn get_mode(&self) -> MODE32 {
         // for 32bit mode
         match self.value.get_bit(31) {
@@ -25,6 +26,7 @@ impl SATP {
         }
     }
     #[allow(unused)]
+    #[inline]
     pub fn set_mode(&mut self, mode: MODE32) {
         self.value.set_bit(
             31,
@@ -33,6 +35,28 @@ impl SATP {
                 MODE32::Sv32 => true,
             },
         );
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn get_asid(&self) -> usize {
+        // TODO: usize --> ASID
+        self.value.get_bits(22..=30)
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn set_asid(&mut self, v: usize) {
+        self.value.set_bits(22..=30, v);
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn get_ppn(&self) -> usize {
+        // TODO: usize --> PPN
+        self.value.get_bits(0..=21)
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn set_ppn(&mut self, v: usize) {
+        self.value.set_bits(0..=21, v);
     }
 }
 
