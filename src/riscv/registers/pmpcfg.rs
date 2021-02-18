@@ -159,19 +159,18 @@ fn write_pmpcfg_test() {
         PMPCfg::initialize();
     }
 
-    let mut pmpcfg = PMPCfg::read();
-    pmpcfg.get_mut_rule_at(0).set_adr_mth(AddressMatching::TOR);
-    pmpcfg.get_mut_rule_at(0).set_read(true);
-    pmpcfg.get_mut_rule_at(0).set_write(true);
-    pmpcfg.get_mut_rule_at(0).set_execute(true);
+    PMPCfg::operate(|mut old| {
+        old.get_mut_rule_at(0).set_adr_mth(AddressMatching::TOR);
+        old.get_mut_rule_at(0).set_read(true);
+        old.get_mut_rule_at(0).set_write(true);
+        old.get_mut_rule_at(0).set_execute(true);
 
-    pmpcfg.get_mut_rule_at(5).set_adr_mth(AddressMatching::NA4);
-    pmpcfg.get_mut_rule_at(5).set_read(true);
-    pmpcfg.get_mut_rule_at(5).set_execute(true);
+        old.get_mut_rule_at(5).set_adr_mth(AddressMatching::NA4);
+        old.get_mut_rule_at(5).set_read(true);
+        old.get_mut_rule_at(5).set_execute(true);
 
-    unsafe {
-        PMPCfg::write(pmpcfg);
-    }
+        old
+    });
 
     assert_eq!(
         unsafe { PMPCfg::read().value },
