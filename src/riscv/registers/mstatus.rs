@@ -10,7 +10,7 @@ pub struct MStatus {
 }
 
 #[allow(unused)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum MPP {
     User = 0b00,
     Supervisor = 0b01,
@@ -53,9 +53,6 @@ impl CSRegister for MStatus {
 
 #[test_case]
 fn mpp_write_test() {
-    unsafe {
-        MStatus::initialize();
-    }
     let mut ms = MStatus::get_unset();
     ms.set_mpp(MPP::Supervisor);
 

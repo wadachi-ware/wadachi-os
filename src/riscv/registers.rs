@@ -26,6 +26,7 @@ macro_rules! read_csr {
 
 pub mod mepc;
 pub mod mstatus;
+pub mod satp;
 
 pub trait CSRegister
 where

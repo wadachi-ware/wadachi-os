@@ -1,7 +1,12 @@
-use super::*;
-
+#[allow(unused)]
 pub fn supervisor_start() -> ! {
     println!("In supervisor mode");
 
-    shutdown(0);
+    unsafe {
+        loop {
+            llvm_asm!("wfi");
+        }
+    }
+
+    loop {}
 }

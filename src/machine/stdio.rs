@@ -1,3 +1,4 @@
+use core::ptr::write_volatile;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
@@ -24,7 +25,9 @@ impl UARTBuffer {
 impl Write for UARTBuffer {
     fn write_str(&mut self, msg: &str) -> Result<(), Error> {
         for c in msg.chars() {
-            *self.address = c as u8;
+            unsafe {
+                write_volatile(self.address, c as u8);
+            }
         }
         Ok(())
     }
