@@ -15,9 +15,6 @@ use super::{
     supervisor::supervisor_start,
 };
 
-const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;
-// see http://www.katsuster.net/index.php?arg_act=cmd_show_diary&arg_date=20210203&arg_count_article=20
-
 #[no_mangle]
 #[allow(unreachable_code)]
 pub fn machine_start() -> ! {
@@ -48,11 +45,17 @@ pub fn machine_start() -> ! {
     mret::mret();
 }
 
+const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;
+// see https://github.com/qemu/qemu/blob/master/hw/riscv/virt.c#L52
+
+const QEMU_VIRTIO_EXIT_CDOE_FAIL: u32 = 0x3333;
+// see https://github.com/qemu/qemu/blob/master/hw/misc/sifive_test.c#L42
+
 #[no_mangle]
 pub fn shutdown(exit_code: u16) -> ! {
     use core::ptr::write_volatile;
 
-    let return_code: u32 = (exit_code as u32) << 16 | 0x3333;
+    let return_code: u32 = (exit_code as u32) << 16 | QEMU_VIRTIO_EXIT_CDOE_FAIL;
 
     unsafe {
         // *(QEMU_VIRTIO_EXIT_ADDRESS as *mut u32) = exit_code;
