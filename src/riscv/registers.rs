@@ -1,6 +1,6 @@
 #[allow(unused)]
 macro_rules! write_csr {
-    ($csr_name: literal) => {
+    ($csr_name: expr) => {
         #[inline]
         #[allow(unused)]
         unsafe fn internal_write(value: usize) {
@@ -11,7 +11,7 @@ macro_rules! write_csr {
 
 #[allow(unused)]
 macro_rules! read_csr {
-    ($csr_name: literal) => {
+    ($csr_name: expr) => {
         #[inline]
         #[allow(unused)]
         fn internal_read() -> usize {
@@ -48,6 +48,7 @@ macro_rules! make_bit_get_set_method {
 
 pub mod mepc;
 pub mod mstatus;
+pub mod pmpaddr;
 pub mod pmpcfg;
 pub mod satp;
 
