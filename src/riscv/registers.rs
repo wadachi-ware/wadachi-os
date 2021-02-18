@@ -23,6 +23,26 @@ macro_rules! read_csr {
         }
     };
 }
+#[allow(unused)]
+macro_rules! make_bit_get_set_method {
+    (accessibility = $accessibility: ident, field_name = $field_name: ident, internal_name = $internal_name: ident, bit = $bit: expr) => {
+        paste::item! {
+            #[inline]
+            #[allow(unused)]
+            $accessibility fn [<get_ $field_name>](&self) -> bool {
+                self.$internal_name.get_bit($bit)
+            }
+            #[inline]
+            #[allow(unused)]
+            $accessibility fn [<set_ $field_name>](&mut self, v: bool) {
+                self.$internal_name.set_bit($bit, v);
+            }
+        }
+    };
+    (field_name = $field_name: ident, bit = $bit: expr) => {
+        make_bit_get_set_method!(accessibility = pub, field_name = $field_name, internal_name = value, bit = $bit);
+    };
+}
 
 pub mod mepc;
 pub mod mstatus;
