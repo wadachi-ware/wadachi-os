@@ -30,11 +30,13 @@ macro_rules! make_bit_get_set_method {
             #[inline]
             #[allow(unused)]
             $accessibility fn [<get_ $field_name>](&self) -> bool {
+                use bit_field::BitField;
                 self.$internal_name.get_bit($bit)
             }
             #[inline]
             #[allow(unused)]
             $accessibility fn [<set_ $field_name>](&mut self, v: bool) {
+                use bit_field::BitField;
                 self.$internal_name.set_bit($bit, v);
             }
         }
@@ -46,6 +48,7 @@ macro_rules! make_bit_get_set_method {
 
 pub mod mepc;
 pub mod mstatus;
+pub mod pmpcfg;
 pub mod satp;
 
 pub trait CSRegister
