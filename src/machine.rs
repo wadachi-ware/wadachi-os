@@ -4,7 +4,7 @@ pub mod test;
 
 use super::{
     riscv::{
-        instructions::mret,
+        instructions::{mret, wfi},
         registers::{
             mepc::MEPC,
             mstatus::{MStatus, MPP},
@@ -60,8 +60,6 @@ pub fn shutdown(exit_code: u16) -> ! {
     }
 
     loop {
-        unsafe {
-            llvm_asm!("wfi");
-        };
+        wfi::wfi();
     }
 }
