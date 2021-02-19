@@ -22,12 +22,19 @@ union PMPCfgRegister {
     value: usize,
 }
 
+#[derive(Clone, Copy)]
 pub union PMPCfg {
     csrs: [PMPCfgRegister; 4],
     // 32bit RISCV ISA has 4 pmpcfg registers.
     #[allow(unused)]
     // for tests
     value: u128,
+}
+
+impl Default for PMPCfg {
+    fn default() -> Self {
+        Self { value: 0 }
+    }
 }
 
 impl PMPRule {
@@ -50,8 +57,10 @@ impl PMPRule {
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_adr_mth(&mut self, adm: AddressMatching) {
-        self.value.set_bits(3..=4, adm as u8);
+    pub fn set_adr_mth(&self, adm: AddressMatching) -> Self {
+        let mut ret = self.clone();
+        ret.value.set_bits(3..=4, adm as u8);
+        ret
     }
 }
 
@@ -117,37 +126,24 @@ impl CSRegister for PMPCfg {
             ],
         }
     }
-
-    #[allow(unused)]
-    #[inline]
-    fn get_unset() -> Self {
-        Self {
-            csrs: [
-                PMPCfgRegister { value: 0 },
-                PMPCfgRegister { value: 0 },
-                PMPCfgRegister { value: 0 },
-                PMPCfgRegister { value: 0 },
-            ],
-        }
-    }
 }
 
 #[test_case]
 fn write_method_test() {
-    let mut pmpcfg = PMPCfg::get_unset();
+    let mut pmpcfg = PMPCfg::default();
     let rule: &mut PMPRule = pmpcfg.get_mut_rule_at(0);
-    rule.set_lock(true);
-    rule.set_adr_mth(AddressMatching::TOR);
-    rule.set_read(true);
-    rule.set_write(true);
-    rule.set_execute(true);
+    *rule = rule.set_lock(true);
+    *rule = rule.set_adr_mth(AddressMatching::TOR);
+    *rule = rule.set_read(true);
+    *rule = rule.set_write(true);
+    *rule = rule.set_execute(true);
 
     assert_eq!(rule.value, 0b10001111);
 
     let rule: &mut PMPRule = pmpcfg.get_mut_rule_at(5);
-    rule.set_adr_mth(AddressMatching::NA4);
-    rule.set_read(true);
-    rule.set_execute(true);
+    *rule = rule.set_adr_mth(AddressMatching::NA4);
+    *rule = rule.set_read(true);
+    *rule = rule.set_execute(true);
 
     assert_eq!(unsafe { pmpcfg.value }, 0b00010101 << (8 * 5) | 0b10001111);
 }
@@ -160,14 +156,17 @@ fn write_pmpcfg_test() {
     }
 
     PMPCfg::operate(|mut old| {
-        old.get_mut_rule_at(0).set_adr_mth(AddressMatching::TOR);
-        old.get_mut_rule_at(0).set_read(true);
-        old.get_mut_rule_at(0).set_write(true);
-        old.get_mut_rule_at(0).set_execute(true);
+        let rule = old.get_mut_rule_at(0);
 
-        old.get_mut_rule_at(5).set_adr_mth(AddressMatching::NA4);
-        old.get_mut_rule_at(5).set_read(true);
-        old.get_mut_rule_at(5).set_execute(true);
+        *rule = rule.set_adr_mth(AddressMatching::TOR);
+        *rule = rule.set_read(true);
+        *rule = rule.set_write(true);
+        *rule = rule.set_execute(true);
+
+        let rule = old.get_mut_rule_at(5);
+        *rule = rule.set_adr_mth(AddressMatching::NA4);
+        *rule = rule.set_read(true);
+        *rule = rule.set_execute(true);
 
         old
     });

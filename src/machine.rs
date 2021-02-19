@@ -34,10 +34,10 @@ pub fn machine_start() -> ! {
 
     PMPCfg::operate(|mut old| {
         let rule0: &mut PMPRule = old.get_mut_rule_at(0);
-        rule0.set_adr_mth(AddressMatching::TOR);
-        rule0.set_read(true);
-        rule0.set_write(true);
-        rule0.set_execute(true);
+        *rule0 = rule0.set_adr_mth(AddressMatching::TOR);
+        *rule0 = rule0.set_read(true);
+        *rule0 = rule0.set_write(true);
+        *rule0 = rule0.set_execute(true);
 
         old
     });

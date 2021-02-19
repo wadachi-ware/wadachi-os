@@ -60,7 +60,7 @@ impl SATP {
     #[allow(unused)]
     #[inline]
     pub fn set_ppn(&self, v: usize) -> Self {
-        let mut ret = self.clone
+        let mut ret = self.clone();
         ret.value.set_bits(0..=21, v);
         ret
     }

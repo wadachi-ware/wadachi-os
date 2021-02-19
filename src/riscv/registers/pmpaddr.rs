@@ -3,7 +3,7 @@ use super::CSRegister;
 macro_rules! make_pmpaddr {
     ($addr_num: expr) => {
         paste::item! {
-            #[derive(Debug, PartialEq)]
+            #[derive(Debug, PartialEq, Default)]
             pub struct [<PMPAddr $addr_num>] {
                 value: usize,
             }
@@ -32,11 +32,6 @@ macro_rules! make_pmpaddr {
                         value: internal_read(),
                     }
                 }
-                fn get_unset() -> Self {
-                    Self {
-                        value: 0
-                    }
-                }
             }
         }
     };
@@ -50,7 +45,7 @@ seq!(N in 0..16 {
 
 #[test_case]
 fn write_method_test() {
-    let mut pmpaddr = PMPAddr0::get_unset();
+    let mut pmpaddr = PMPAddr0::default();
     pmpaddr.set_addr(0xdeadbeef);
 
     assert_eq!(pmpaddr.value, 0xdeadbeef);
