@@ -9,7 +9,7 @@ use super::{
             mepc::MEPC,
             mstatus::{MStatus, MPP},
             pmpaddr::*,
-            pmpcfg::{AddressMatching, PMPCfg, PMPRule},
+            pmpcfg::{AddressMatching, PMPCfg},
             satp::{MODE32, SATP},
             CSRegister,
         },
@@ -32,14 +32,13 @@ pub fn machine_start() -> ! {
 
     SATP::operate(|old| old.set_mode(MODE32::Bare));
 
-    PMPCfg::operate(|mut old| {
-        let rule0: &mut PMPRule = old.get_mut_rule_at(0);
-        *rule0 = rule0.set_adr_mth(AddressMatching::TOR);
-        *rule0 = rule0.set_read(true);
-        *rule0 = rule0.set_write(true);
-        *rule0 = rule0.set_execute(true);
-
-        old
+    PMPCfg::operate(|old| {
+        old.rule_operate(0, |rule| {
+            let rule = rule.set_adr_mth(AddressMatching::TOR);
+            let rule = rule.set_read(true);
+            let rule = rule.set_write(true);
+            rule.set_execute(true)
+        })
     });
 
     PMPAddr0::operate(|mut old| {

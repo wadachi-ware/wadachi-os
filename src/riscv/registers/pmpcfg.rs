@@ -66,8 +66,14 @@ impl PMPRule {
 
 impl PMPCfg {
     #[allow(unused)]
-    pub fn get_mut_rule_at(&mut self, index: usize) -> &mut PMPRule {
-        unsafe { &mut self.csrs[index / 4].rules[index % 4] }
+    #[inline]
+    pub fn rule_operate<F: Fn(PMPRule) -> PMPRule>(&self, index: usize, f: F) -> Self {
+        let mut ret = self.clone();
+        unsafe {
+            ret.csrs[index / 4].rules[index % 4] = f(ret.csrs[index / 4].rules[index % 4]);
+        }
+
+        ret
     }
 }
 
@@ -130,20 +136,24 @@ impl CSRegister for PMPCfg {
 
 #[test_case]
 fn write_method_test() {
-    let mut pmpcfg = PMPCfg::default();
-    let rule: &mut PMPRule = pmpcfg.get_mut_rule_at(0);
-    *rule = rule.set_lock(true);
-    *rule = rule.set_adr_mth(AddressMatching::TOR);
-    *rule = rule.set_read(true);
-    *rule = rule.set_write(true);
-    *rule = rule.set_execute(true);
+    let pmpcfg = PMPCfg::default();
+    let pmpcfg = pmpcfg.rule_operate(0, |rule| {
+        let rule = rule.set_lock(true);
+        let rule = rule.set_adr_mth(AddressMatching::TOR);
+        let rule = rule.set_read(true);
+        let rule = rule.set_write(true);
+        rule.set_execute(true)
+    });
 
-    assert_eq!(rule.value, 0b10001111);
+    unsafe {
+        assert_eq!(pmpcfg.csrs[0].rules[0].value, 0b10001111);
+    }
 
-    let rule: &mut PMPRule = pmpcfg.get_mut_rule_at(5);
-    *rule = rule.set_adr_mth(AddressMatching::NA4);
-    *rule = rule.set_read(true);
-    *rule = rule.set_execute(true);
+    let pmpcfg = pmpcfg.rule_operate(5, |rule| {
+        let rule = rule.set_adr_mth(AddressMatching::NA4);
+        let rule = rule.set_read(true);
+        rule.set_execute(true)
+    });
 
     assert_eq!(unsafe { pmpcfg.value }, 0b00010101 << (8 * 5) | 0b10001111);
 }
@@ -155,20 +165,19 @@ fn write_pmpcfg_test() {
         PMPCfg::initialize();
     }
 
-    PMPCfg::operate(|mut old| {
-        let rule = old.get_mut_rule_at(0);
+    PMPCfg::operate(|pmpcfg| {
+        let pmpcfg = pmpcfg.rule_operate(0, |rule| {
+            let rule = rule.set_adr_mth(AddressMatching::TOR);
+            let rule = rule.set_read(true);
+            let rule = rule.set_write(true);
+            rule.set_execute(true)
+        });
 
-        *rule = rule.set_adr_mth(AddressMatching::TOR);
-        *rule = rule.set_read(true);
-        *rule = rule.set_write(true);
-        *rule = rule.set_execute(true);
-
-        let rule = old.get_mut_rule_at(5);
-        *rule = rule.set_adr_mth(AddressMatching::NA4);
-        *rule = rule.set_read(true);
-        *rule = rule.set_execute(true);
-
-        old
+        pmpcfg.rule_operate(5, |rule| {
+            let rule = rule.set_adr_mth(AddressMatching::NA4);
+            let rule = rule.set_read(true);
+            rule.set_execute(true)
+        })
     });
 
     assert_eq!(
