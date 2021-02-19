@@ -68,11 +68,10 @@ impl PMPCfg {
     #[allow(unused)]
     #[inline]
     pub fn rule_operate<F: Fn(PMPRule) -> PMPRule>(&self, index: usize, f: F) -> Self {
-        let mut ret = self.clone();
+        let mut ret = (*self).clone();
         unsafe {
             ret.csrs[index / 4].rules[index % 4] = f(ret.csrs[index / 4].rules[index % 4]);
         }
-
         ret
     }
 }

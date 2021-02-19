@@ -41,11 +41,18 @@ pub fn machine_start() -> ! {
         })
     });
 
-    PMPAddr0::operate(|mut old| {
-        old.set_addr(0xffffffff);
+    PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
-        old
+    PMPCfg::operate(|old| {
+        old.rule_operate(0, |rule| {
+            let rule = rule.set_adr_mth(AddressMatching::TOR);
+            let rule = rule.set_read(true);
+            let rule = rule.set_write(true);
+            rule.set_execute(true)
+        })
     });
+
+    PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
     mret::mret();
 }

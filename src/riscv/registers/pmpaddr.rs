@@ -3,7 +3,7 @@ use super::CSRegister;
 macro_rules! make_pmpaddr {
     ($addr_num: expr) => {
         paste::item! {
-            #[derive(Debug, PartialEq, Default)]
+            #[derive(Debug, Clone, PartialEq, Default)]
             pub struct [<PMPAddr $addr_num>] {
                 value: usize,
             }
@@ -16,8 +16,11 @@ macro_rules! make_pmpaddr {
                 }
                 #[allow(unused)]
                 #[inline]
-                pub fn set_addr(&mut self, value: usize) {
-                    self.value = value;
+                pub fn set_addr(&self, value: usize) -> Self {
+                    let mut ret = (*self).clone();
+                    ret.value = value;
+
+                    ret
                 }
             }
 
@@ -46,7 +49,7 @@ seq!(N in 0..16 {
 #[test_case]
 fn write_method_test() {
     let mut pmpaddr = PMPAddr0::default();
-    pmpaddr.set_addr(0xdeadbeef);
+    pmpaddr = pmpaddr.set_addr(0xdeadbeef);
 
     assert_eq!(pmpaddr.value, 0xdeadbeef);
 }
@@ -59,10 +62,8 @@ macro_rules! make_pmpaddr_test {
                 unsafe {
                     [<PMPAddr $addr_num>]::initialize();
                 }
-                [<PMPAddr $addr_num>]::operate(|mut old| {
-                    old.set_addr($addr_num * 1000);
-
-                    old
+                [<PMPAddr $addr_num>]::operate(| old | {
+                    old.set_addr($addr_num * 1000)
                 });
                 assert_eq!([<PMPAddr $addr_num>]::read().value, $addr_num * 1000);
             }

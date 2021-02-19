@@ -21,6 +21,7 @@ pub enum SPP {
     User = 0,
     Supervisor = 1,
 }
+#[allow(unused)]
 pub enum FS {
     Off = 0,
     Initial = 1,
@@ -84,23 +85,13 @@ impl MStatus {
             _ => unreachable!(),
         }
     }
+    #[inline]
     #[allow(unused)]
     #[inline]
     pub fn set_mpp(&self, mpp: MPP) -> Self {
         let mut ret = self.clone();
         ret.value.set_bits(11..=12, mpp as usize);
         ret
-    }
-    #[inline]
-    #[allow(unused)]
-    pub fn get_fs(&mut self) -> FS {
-        match self.value.get_bits(13..=14) {
-            0b00 => FS::Off,
-            0b01 => FS::Initial,
-            0b10 => FS::Clean,
-            0b11 => FS::Dirty,
-            _ => unreachable!(),
-        }
     }
     #[inline]
     #[allow(unused)]
