@@ -46,8 +46,10 @@ impl SATP {
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_asid(&mut self, v: usize) {
-        self.value.set_bits(22..=30, v);
+    pub fn set_asid(&self, v: usize) -> Self {
+        let mut ret = self.clone();
+        ret.value.set_bits(22..=30, v);
+        ret
     }
     #[allow(unused)]
     #[inline]
@@ -57,8 +59,10 @@ impl SATP {
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_ppn(&mut self, v: usize) {
-        self.value.set_bits(0..=21, v);
+    pub fn set_ppn(&self, v: usize) -> Self {
+        let mut ret = self.clone
+        ret.value.set_bits(0..=21, v);
+        ret
     }
 }
 
