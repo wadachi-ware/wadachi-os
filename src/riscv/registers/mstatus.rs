@@ -3,7 +3,7 @@ use bit_field::BitField;
 use super::CSRegister;
 
 #[allow(unused)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct MStatus {
     // see p21 in https://people.eecs.berkeley.edu/~krste/papers/riscv-privileged-v1.9.1.pdf
     value: usize,
@@ -20,6 +20,7 @@ pub enum MPP {
 
 impl MStatus {
     #[allow(unused)]
+    #[inline]
     pub fn get_mpp(&self) -> MPP {
         match self.value.get_bits(11..=12) {
             0b00 => MPP::User,
@@ -30,8 +31,11 @@ impl MStatus {
         }
     }
     #[allow(unused)]
-    pub fn set_mpp(&mut self, mpp: MPP) {
-        self.value.set_bits(11..=12, mpp as usize);
+    #[inline]
+    pub fn set_mpp(&self, mpp: MPP) -> Self {
+        let mut ret = self.clone();
+        ret.value.set_bits(11..=12, mpp as usize);
+        ret
     }
 }
 
@@ -46,20 +50,17 @@ impl CSRegister for MStatus {
             value: internal_read(),
         }
     }
-    fn get_unset() -> Self {
-        Self { value: 0 }
-    }
 }
 
 #[test_case]
 fn mpp_write_test() {
-    let mut ms = MStatus::get_unset();
-    ms.set_mpp(MPP::Supervisor);
+    let mut ms = MStatus::default();
+    ms = ms.set_mpp(MPP::Supervisor);
 
     assert_eq!(ms.value, 0b100000000000);
     assert_eq!(ms.get_mpp(), MPP::Supervisor);
 
-    ms.set_mpp(MPP::Machine);
+    ms = ms.set_mpp(MPP::Machine);
 
     assert_eq!(ms.value, 0b1100000000000);
     assert_eq!(ms.get_mpp(), MPP::Machine);
@@ -72,7 +73,7 @@ fn write_mstatus_test() {
     }
 
     let mut ms = MStatus::read();
-    ms.set_mpp(MPP::Machine);
+    ms = ms.set_mpp(MPP::Machine);
     unsafe {
         MStatus::write(ms);
     }
@@ -86,11 +87,7 @@ fn operate_mstatus_test() {
         MStatus::initialize();
     }
 
-    MStatus::operate(|mut old| {
-        old.set_mpp(MPP::Machine);
-
-        old
-    });
+    MStatus::operate(|old| old.set_mpp(MPP::Machine));
 
     assert_eq!(MStatus::read().value, 0b1100000000000);
 }

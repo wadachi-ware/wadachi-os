@@ -2,7 +2,7 @@ use super::CSRegister;
 use bit_field::BitField;
 
 #[allow(unused)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct SATP {
     // Supervisor Address Translatiion and Protection
     // see p66 at https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
@@ -17,6 +17,7 @@ pub enum MODE32 {
 
 impl SATP {
     #[allow(unused)]
+    #[inline]
     pub fn get_mode(&self) -> MODE32 {
         // for 32bit mode
         match self.value.get_bit(31) {
@@ -25,14 +26,17 @@ impl SATP {
         }
     }
     #[allow(unused)]
-    pub fn set_mode(&mut self, mode: MODE32) {
-        self.value.set_bit(
+    #[inline]
+    pub fn set_mode(&self, mode: MODE32) -> Self {
+        let mut ret = self.clone();
+        ret.value.set_bit(
             31,
             match mode {
                 MODE32::Bare => false,
                 MODE32::Sv32 => true,
             },
         );
+        ret
     }
 }
 
@@ -47,20 +51,17 @@ impl CSRegister for SATP {
             value: internal_read(),
         }
     }
-    fn get_unset() -> Self {
-        Self { value: 0 }
-    }
 }
 
 #[test_case]
 fn mode_write_test() {
-    let mut satp = SATP::get_unset();
-    satp.set_mode(MODE32::Bare);
+    let mut satp = SATP::default();
+    satp = satp.set_mode(MODE32::Bare);
 
     assert_eq!(satp.value, 0);
     assert_eq!(satp.get_mode(), MODE32::Bare);
 
-    satp.set_mode(MODE32::Sv32);
+    satp = satp.set_mode(MODE32::Sv32);
     assert_eq!(satp.value, 1 << 31);
     assert_eq!(satp.get_mode(), MODE32::Sv32);
 }
@@ -72,7 +73,7 @@ fn write_mode_test() {
     }
 
     let mut satp = SATP::read();
-    satp.set_mode(MODE32::Sv32);
+    satp = satp.set_mode(MODE32::Sv32);
     unsafe {
         SATP::write(satp);
     }

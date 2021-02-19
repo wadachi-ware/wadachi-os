@@ -31,6 +31,7 @@ pub mod satp;
 pub trait CSRegister
 where
     Self: Sized,
+    Self: Default,
 {
     /// write back after some operations
     fn operate<F: Fn(Self) -> Self>(f: F) {
@@ -40,10 +41,9 @@ where
     }
     unsafe fn initialize() {
         // for tests
-        Self::write(Self::get_unset());
+        Self::write(Self::default());
     }
 
     unsafe fn write(_: Self);
     fn read() -> Self;
-    fn get_unset() -> Self;
 }

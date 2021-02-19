@@ -24,23 +24,11 @@ pub fn machine_start() -> ! {
     println!("Hello Kernel!");
     println!("In machine mode");
 
-    MStatus::operate(|mut old| {
-        old.set_mpp(MPP::Supervisor);
+    MStatus::operate(|old| old.set_mpp(MPP::Supervisor));
 
-        old
-    });
+    MEPC::operate(|old| old.set(supervisor_start as usize));
 
-    MEPC::operate(|mut old| {
-        old.set(supervisor_start as usize);
-
-        old
-    });
-
-    SATP::operate(|mut old| {
-        old.set_mode(MODE32::Bare);
-
-        old
-    });
+    SATP::operate(|old| old.set_mode(MODE32::Bare));
 
     mret::mret();
 }
