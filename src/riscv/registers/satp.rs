@@ -94,11 +94,7 @@ fn write_mode_test() {
         SATP::initialize();
     }
 
-    let mut satp = SATP::read();
-    satp = satp.set_mode(MODE32::Sv32);
-    unsafe {
-        SATP::write(satp);
-    }
+    SATP::operate(|old| old.set_mode(MODE32::Sv32));
 
     assert_eq!(SATP::read().value, 1 << 31);
 }
