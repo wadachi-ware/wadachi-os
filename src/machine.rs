@@ -34,10 +34,10 @@ pub fn machine_start() -> ! {
 
     PMPCfg::operate(|old| {
         old.rule_operate(0, |rule| {
-            let rule = rule.set_adr_mth(AddressMatching::TOR);
-            let rule = rule.set_read(true);
-            let rule = rule.set_write(true);
-            rule.set_execute(true)
+            rule.set_adr_mth(AddressMatching::TOR)
+                .set_read(true)
+                .set_write(true)
+                .set_execute(true)
         })
     });
 
@@ -45,10 +45,10 @@ pub fn machine_start() -> ! {
 
     PMPCfg::operate(|old| {
         old.rule_operate(0, |rule| {
-            let rule = rule.set_adr_mth(AddressMatching::TOR);
-            let rule = rule.set_read(true);
-            let rule = rule.set_write(true);
-            rule.set_execute(true)
+            rule.set_adr_mth(AddressMatching::TOR)
+                .set_read(true)
+                .set_write(true)
+                .set_execute(true)
         })
     });
 

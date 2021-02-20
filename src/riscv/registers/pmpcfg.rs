@@ -135,13 +135,12 @@ impl CSRegister for PMPCfg {
 
 #[test_case]
 fn write_method_test() {
-    let pmpcfg = PMPCfg::default();
-    let pmpcfg = pmpcfg.rule_operate(0, |rule| {
-        let rule = rule.set_lock(true);
-        let rule = rule.set_adr_mth(AddressMatching::TOR);
-        let rule = rule.set_read(true);
-        let rule = rule.set_write(true);
-        rule.set_execute(true)
+    let pmpcfg = PMPCfg::default().rule_operate(0, |rule| {
+        rule.set_lock(true)
+            .set_adr_mth(AddressMatching::TOR)
+            .set_read(true)
+            .set_write(true)
+            .set_execute(true)
     });
 
     unsafe {
@@ -149,9 +148,9 @@ fn write_method_test() {
     }
 
     let pmpcfg = pmpcfg.rule_operate(5, |rule| {
-        let rule = rule.set_adr_mth(AddressMatching::NA4);
-        let rule = rule.set_read(true);
-        rule.set_execute(true)
+        rule.set_adr_mth(AddressMatching::NA4)
+            .set_read(true)
+            .set_execute(true)
     });
 
     assert_eq!(unsafe { pmpcfg.value }, 0b00010101 << (8 * 5) | 0b10001111);
@@ -165,18 +164,18 @@ fn write_pmpcfg_test() {
     }
 
     PMPCfg::operate(|pmpcfg| {
-        let pmpcfg = pmpcfg.rule_operate(0, |rule| {
-            let rule = rule.set_adr_mth(AddressMatching::TOR);
-            let rule = rule.set_read(true);
-            let rule = rule.set_write(true);
-            rule.set_execute(true)
-        });
-
-        pmpcfg.rule_operate(5, |rule| {
-            let rule = rule.set_adr_mth(AddressMatching::NA4);
-            let rule = rule.set_read(true);
-            rule.set_execute(true)
-        })
+        pmpcfg
+            .rule_operate(0, |rule| {
+                rule.set_adr_mth(AddressMatching::TOR)
+                    .set_read(true)
+                    .set_write(true)
+                    .set_execute(true)
+            })
+            .rule_operate(5, |rule| {
+                rule.set_adr_mth(AddressMatching::NA4)
+                    .set_read(true)
+                    .set_execute(true)
+            })
     });
 
     assert_eq!(
