@@ -1,5 +1,6 @@
 #[macro_use]
 pub mod stdio;
+pub mod malloc;
 pub mod test;
 
 use super::{
@@ -20,6 +21,18 @@ use super::{
 #[no_mangle]
 #[allow(unreachable_code)]
 pub fn machine_start() -> ! {
+    unsafe {
+        println!("-- Stack -- ");
+        println!(" +-- start: {:x}", crate::KERNEL_STACK_START_ADDR);
+        println!(" +-- end  : {:x}", crate::KERNEL_STACK_END_ADDR);
+        println!("-- Heap  -- ");
+        println!(" +-- start: {:x}", crate::KERNEL_HEAP_START_ADDR);
+        println!(" +-- end  : {:x}", crate::KERNEL_HEAP_END_ADDR);
+    }
+
+    println!("Initializing heap...");
+    malloc::init_heap();
+
     #[cfg(test)]
     crate::test_entry();
 
