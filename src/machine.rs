@@ -43,17 +43,6 @@ pub fn machine_start() -> ! {
 
     PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
-    PMPCfg::operate(|old| {
-        old.rule_operate(0, |rule| {
-            rule.set_adr_mth(AddressMatching::TOR)
-                .set_read(true)
-                .set_write(true)
-                .set_execute(true)
-        })
-    });
-
-    PMPAddr0::operate(|old| old.set_addr(0xffffffff));
-
     mret::mret();
 }
 
