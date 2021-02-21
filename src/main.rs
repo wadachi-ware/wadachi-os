@@ -4,12 +4,22 @@
 #![feature(llvm_asm)]
 #![test_runner(crate::tests::test::test_runner)]
 #![reexport_test_harness_main = "test_entry"]
+#![feature(alloc_error_handler)]
+
+extern "C" {
+    static KERNEL_HEAP_START_ADDR: usize;
+    static KERNEL_HEAP_END_ADDR: usize;
+    static KERNEL_STACK_START_ADDR: usize;
+    static KERNEL_STACK_END_ADDR: usize;
+}
 
 #[macro_use]
 mod machine;
 mod riscv;
 mod supervisor;
 mod tests;
+
+extern crate alloc;
 
 use machine::*;
 

@@ -35,11 +35,10 @@ macro_rules! make_bit_get_set_method {
             }
             #[inline]
             #[allow(unused)]
-            $accessibility fn [<set_ $field_name>](&self, v: bool) -> Self {
+            $accessibility fn [<set_ $field_name>](mut self, v: bool) -> Self {
                 use bit_field::BitField;
-                let mut ret = self.clone();
-                ret.$internal_name.set_bit($bit, v);
-                ret
+                self.$internal_name.set_bit($bit, v);
+                self
             }
         }
     };
