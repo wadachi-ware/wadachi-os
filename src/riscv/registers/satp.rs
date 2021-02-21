@@ -27,16 +27,39 @@ impl SATP {
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_mode(&self, mode: MODE32) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bit(
+    pub fn set_mode(mut self, mode: MODE32) -> Self {
+        self.value.set_bit(
             31,
             match mode {
                 MODE32::Bare => false,
                 MODE32::Sv32 => true,
             },
         );
-        ret
+        self
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn get_asid(&self) -> usize {
+        // TODO: usize --> ASID
+        self.value.get_bits(22..=30)
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn set_asid(mut self, v: usize) -> Self {
+        self.value.set_bits(22..=30, v);
+        self
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn get_ppn(&self) -> usize {
+        // TODO: usize --> PPN
+        self.value.get_bits(0..=21)
+    }
+    #[allow(unused)]
+    #[inline]
+    pub fn set_ppn(mut self, v: usize) -> Self {
+        self.value.set_bits(0..=21, v);
+        self
     }
 }
 
@@ -72,11 +95,7 @@ fn write_mode_test() {
         SATP::initialize();
     }
 
-    let mut satp = SATP::read();
-    satp = satp.set_mode(MODE32::Sv32);
-    unsafe {
-        SATP::write(satp);
-    }
+    SATP::operate(|old| old.set_mode(MODE32::Sv32));
 
     assert_eq!(SATP::read().value, 1 << 31);
 }

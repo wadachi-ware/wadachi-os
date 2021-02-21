@@ -8,6 +8,8 @@ use super::{
         registers::{
             mepc::MEPC,
             mstatus::{MStatus, MPP},
+            pmpaddr::*,
+            pmpcfg::{AddressMatching, PMPCfg},
             satp::{MODE32, SATP},
             CSRegister,
         },
@@ -29,6 +31,17 @@ pub fn machine_start() -> ! {
     MEPC::operate(|old| old.set(supervisor_start as usize));
 
     SATP::operate(|old| old.set_mode(MODE32::Bare));
+
+    PMPCfg::operate(|old| {
+        old.rule_operate(0, |rule| {
+            rule.set_adr_mth(AddressMatching::TOR)
+                .set_read(true)
+                .set_write(true)
+                .set_execute(true)
+        })
+    });
+
+    PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
     mret::mret();
 }
