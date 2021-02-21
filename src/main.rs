@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(custom_test_frameworks)]
 #![feature(llvm_asm)]
-#![test_runner(crate::tests::test::test_runner)]
+#![test_runner(crate::tests::test::runner_interface)]
 #![reexport_test_harness_main = "test_entry"]
 #![feature(alloc_error_handler)]
 
