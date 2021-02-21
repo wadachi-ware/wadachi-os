@@ -1,6 +1,5 @@
 #[macro_use]
 pub mod stdio;
-pub mod test;
 
 use super::{
     riscv::{
@@ -31,17 +30,6 @@ pub fn machine_start() -> ! {
     MEPC::operate(|old| old.set(supervisor_start as usize));
 
     SATP::operate(|old| old.set_mode(MODE32::Bare));
-
-    PMPCfg::operate(|old| {
-        old.rule_operate(0, |rule| {
-            let rule = rule.set_adr_mth(AddressMatching::TOR);
-            let rule = rule.set_read(true);
-            let rule = rule.set_write(true);
-            rule.set_execute(true)
-        })
-    });
-
-    PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
     PMPCfg::operate(|old| {
         old.rule_operate(0, |rule| {

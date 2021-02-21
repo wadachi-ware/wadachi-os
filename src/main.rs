@@ -2,13 +2,14 @@
 #![no_main]
 #![feature(custom_test_frameworks)]
 #![feature(llvm_asm)]
-#![test_runner(machine::test::test_runner)]
+#![test_runner(crate::tests::test::test_runner)]
 #![reexport_test_harness_main = "test_entry"]
 
 #[macro_use]
 mod machine;
 mod riscv;
 mod supervisor;
+mod tests;
 
 use machine::*;
 
