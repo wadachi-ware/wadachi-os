@@ -57,22 +57,20 @@ impl PMPRule {
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_adr_mth(&self, adm: AddressMatching) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bits(3..=4, adm as u8);
-        ret
+    pub fn set_adr_mth(mut self, adm: AddressMatching) -> Self {
+        self.value.set_bits(3..=4, adm as u8);
+        self
     }
 }
 
 impl PMPCfg {
     #[allow(unused)]
     #[inline]
-    pub fn rule_operate<F: Fn(PMPRule) -> PMPRule>(&self, index: usize, f: F) -> Self {
-        let mut ret = (*self).clone();
+    pub fn rule_operate<F: Fn(PMPRule) -> PMPRule>(mut self, index: usize, f: F) -> Self {
         unsafe {
-            ret.csrs[index / 4].rules[index % 4] = f(ret.csrs[index / 4].rules[index % 4]);
+            self.csrs[index / 4].rules[index % 4] = f(self.csrs[index / 4].rules[index % 4]);
         }
-        ret
+        self
     }
 }
 

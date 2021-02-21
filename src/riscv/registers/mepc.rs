@@ -8,10 +8,9 @@ pub struct MEPC {
 impl MEPC {
     #[allow(unused)]
     #[inline]
-    pub fn set(&self, addr: usize) -> Self {
-        let mut ret = self.clone();
-        ret.value = addr;
-        ret
+    pub fn set(mut self, addr: usize) -> Self {
+        self.value = addr;
+        self
     }
 }
 

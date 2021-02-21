@@ -16,11 +16,9 @@ macro_rules! make_pmpaddr {
                 }
                 #[allow(unused)]
                 #[inline]
-                pub fn set_addr(&self, value: usize) -> Self {
-                    let mut ret = (*self).clone();
-                    ret.value = value;
-
-                    ret
+                pub fn set_addr(mut self, value: usize) -> Self {
+                    self.value = value;
+                    self
                 }
             }
 

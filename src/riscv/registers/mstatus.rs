@@ -63,16 +63,15 @@ impl MStatus {
     }
     #[inline]
     #[allow(unused)]
-    pub fn set_spp(&self, spp: SPP) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bit(
+    pub fn set_spp(mut self, spp: SPP) -> Self {
+        self.value.set_bit(
             8,
             match spp {
                 SPP::User => false,
                 SPP::Supervisor => true,
             },
         );
-        ret
+        self
     }
     #[inline]
     #[allow(unused)]
@@ -88,17 +87,15 @@ impl MStatus {
     #[inline]
     #[allow(unused)]
     #[inline]
-    pub fn set_mpp(&self, mpp: MPP) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bits(11..=12, mpp as usize);
-        ret
+    pub fn set_mpp(mut self, mpp: MPP) -> Self {
+        self.value.set_bits(11..=12, mpp as usize);
+        self
     }
     #[inline]
     #[allow(unused)]
-    pub fn set_fs(&self, fs: FS) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bits(13..=14, fs as usize);
-        ret
+    pub fn set_fs(mut self, fs: FS) -> Self {
+        self.value.set_bits(13..=14, fs as usize);
+        self
     }
     #[inline]
     #[allow(unused)]
@@ -113,10 +110,9 @@ impl MStatus {
     }
     #[inline]
     #[allow(unused)]
-    pub fn set_xs(&self, xs: XS) -> Self {
-        let mut ret = self.clone();
-        ret.value.set_bits(15..=16, xs as usize);
-        ret
+    pub fn set_xs(mut self, xs: XS) -> Self {
+        self.value.set_bits(15..=16, xs as usize);
+        self
     }
 }
 
