@@ -1,10 +1,6 @@
 #[macro_use]
 pub mod stdio;
-<<<<<<< HEAD
-=======
 pub mod malloc;
-pub mod test;
->>>>>>> 16-memory-allocator
 
 use super::{
     riscv::{
