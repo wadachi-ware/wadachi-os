@@ -28,13 +28,8 @@ extern "C" {
     pub fn longjmp(_: &RISCV32RawJumpBuffer, _: usize) -> !;
 }
 
-use spin::Mutex;
-
 #[allow(unused)]
-pub type SafeJmpBuf = Mutex<RISCV32RawJumpBuffer>;
-
-#[allow(unused)]
-pub static JMP_BUF: SafeJmpBuf = Mutex::new(RISCV32RawJumpBuffer::default());
+pub static mut JMP_BUF: RISCV32RawJumpBuffer = RISCV32RawJumpBuffer::default();
 
 #[custom_test(ModeMachine)]
 fn setjmp_use_local_test() {
@@ -65,7 +60,7 @@ fn setjmp_use_global_test() {
 
     let mut flag = false;
 
-    let v = unsafe { setjmp(&mut *JMP_BUF.lock()) };
+    let v = unsafe { setjmp(&mut JMP_BUF) };
     if v != 0 {
         assert_eq!(v, 1);
         assert_eq!(unsafe { read_volatile(&flag) }, true);
@@ -77,6 +72,6 @@ fn setjmp_use_global_test() {
     }
 
     unsafe {
-        longjmp(&*JMP_BUF.lock(), 1);
+        longjmp(&JMP_BUF, 1);
     }
 }
