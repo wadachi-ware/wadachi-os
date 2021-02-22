@@ -23,7 +23,7 @@ extern "C" {
     #[allow(unused)]
     pub fn setjmp(_: &mut RISCV32RawJumpBuffer) -> usize;
     #[allow(unused)]
-    pub fn longjmp(_: &RISCV32RawJumpBuffer, _: usize);
+    pub fn longjmp(_: &RISCV32RawJumpBuffer, _: usize) -> !;
 }
 
 use spin::Mutex;
