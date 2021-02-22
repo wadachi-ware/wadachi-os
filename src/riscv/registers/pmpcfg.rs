@@ -2,6 +2,8 @@ use bit_field::BitField;
 
 use super::CSRegister;
 
+use custom_test::custom_test;
+
 #[derive(Clone, Copy)]
 pub struct PMPRule {
     value: u8,
@@ -131,7 +133,7 @@ impl CSRegister for PMPCfg {
     }
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_method_test() {
     let pmpcfg = PMPCfg::default().rule_operate(0, |rule| {
         rule.set_lock(true)
@@ -155,7 +157,7 @@ fn write_method_test() {
 }
 
 /// Lock field cannot reset!!
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_pmpcfg_test() {
     unsafe {
         PMPCfg::initialize();

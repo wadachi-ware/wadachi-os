@@ -2,6 +2,8 @@
 use alloc::alloc::{GlobalAlloc, Layout};
 use linked_list_allocator::LockedHeap;
 
+use custom_test::custom_test;
+
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
@@ -19,7 +21,7 @@ fn handle(x: Layout) -> ! {
     panic!("malloc fail. size: {}", x.size());
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn raw_malloc_test() {
     let layout = Layout::from_size_align(4, 4).unwrap();
     let addr = unsafe { ALLOCATOR.alloc(layout) };
@@ -28,7 +30,7 @@ fn raw_malloc_test() {
     assert!((addr as usize) < unsafe { crate::KERNEL_STACK_END_ADDR });
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn box_test() {
     use alloc::boxed::Box;
 
@@ -38,7 +40,8 @@ fn box_test() {
     assert!((addr as usize) < unsafe { crate::KERNEL_STACK_END_ADDR });
 }
 
-#[test_case]
+// #[test_case]
+#[custom_test(ModeMachine)]
 fn heap_write_test() {
     use alloc::boxed::Box;
 

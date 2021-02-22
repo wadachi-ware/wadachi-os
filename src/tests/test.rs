@@ -1,72 +1,82 @@
 use custom_test::custom_test;
-use inventory;
 
 #[allow(unused)]
+#[derive(PartialEq)]
 pub enum TestCondition {
+    FirstTest,
     ModeMachine,
     ModeSupervisor,
 }
 
 pub trait Testable {
-    fn run(&self);
-    fn get_name(&self) -> &str;
+    fn run(&self) -> bool;
 }
-impl<T> Testable for T
+impl<T> Testable for (T, &'static str)
 where
     T: Fn(),
 {
-    fn run(&self) {
-        print!("{}...\t", core::any::type_name::<T>());
-        self();
-        println!("[b] ok");
-    }
-    fn get_name(&self) -> &str {
-        core::any::type_name::<T>()
-    }
-}
-
-#[allow(unused)]
-pub struct TestCase {
-    #[allow(unused)]
-    cond: TestCondition,
-    #[allow(unused)]
-    test: fn() -> (),
-}
-
-inventory::collect!(TestCase);
-
-macro_rules! condition_test {
-    ($condition: expr) => {
-        paste::item! {
-            for x in inventory::iter::<TestCase>.into_iter() {
-                match x {
-                    TestCase { cond: $condition, test: f } => {
-                        f();
-                    }
-                    _ => {
-                        println!("Foo!");
-                    }
-                }
+    fn run(&self) -> bool {
+        match self {
+            (f, n) => {
+                print!("[+] {0: <100} ", n);
+                f();
+                println!("[b] ok");
             }
         }
-    };
+        true
+    }
 }
 
-pub fn runner_interface(test_case: &[&dyn Testable]) {
-    let tc_num = test_case.len();
-    if tc_num != 0 {
-        println!();
-        println!("#[test_case] attribute can not use.");
-        println!("Use #[custom_test(Mode)] instead.");
-        println!();
-        for t in test_case {
-            println!("Ignore {}", t.get_name());
+pub trait TestProvider {
+    fn test_if_match(&self, _: TestCondition) -> bool;
+}
+
+impl<T, F> TestProvider for T
+where
+    F: Fn(),
+    T: Fn() -> (TestCondition, F, &'static str),
+{
+    fn test_if_match(&self, c: TestCondition) -> bool {
+        match self() {
+            (p, f, n) if p == c => (f, n).run(),
+            (_, _, _) => false,
         }
-        println!();
+    }
+}
+
+#[allow(dead_code)]
+pub fn runner_interface(test_case: &[&dyn TestProvider]) {
+    println!("[/] First Testing...");
+    for x in test_case {
+        x.test_if_match(TestCondition::FirstTest);
     }
 
-    // condition_test!(TestCondition::ModeMachine);
+    println!("[/] Testing in Machine mode");
+    for x in test_case {
+        x.test_if_match(TestCondition::ModeMachine);
+    }
 
-    println!("Test ok. see ya!");
+    println!("[/] Testing in Supervisor mode");
+    for x in test_case {
+        x.test_if_match(TestCondition::ModeSupervisor);
+    }
+
+    println!();
+    println!("test ok. see ya!");
     crate::shutdown(0);
+}
+
+#[custom_test(FirstTest)]
+fn test_of_test() {
+    assert_eq!(1 + 2, 3);
+}
+
+#[custom_test(ModeMachine)]
+fn machine_test() {
+    //
+}
+
+#[custom_test(ModeSupervisor)]
+fn supervisor_test() {
+    //
 }

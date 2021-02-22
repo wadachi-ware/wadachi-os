@@ -1,6 +1,8 @@
 use super::CSRegister;
 use bit_field::BitField;
 
+use custom_test::custom_test;
+
 #[allow(unused)]
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct SATP {
@@ -76,7 +78,7 @@ impl CSRegister for SATP {
     }
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn mode_write_test() {
     let mut satp = SATP::default();
     satp = satp.set_mode(MODE32::Bare);
@@ -89,7 +91,7 @@ fn mode_write_test() {
     assert_eq!(satp.get_mode(), MODE32::Sv32);
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_mode_test() {
     unsafe {
         SATP::initialize();

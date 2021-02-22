@@ -1,5 +1,7 @@
 use super::CSRegister;
 
+use custom_test::custom_test;
+
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct MEPC {
     // see p42 in https://people.eecs.berkeley.edu/~krste/papers/riscv-privileged-v1.9.1.pdf
@@ -27,7 +29,7 @@ impl CSRegister for MEPC {
     }
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_mepc_test() {
     unsafe {
         MEPC::initialize();

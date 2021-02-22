@@ -1,5 +1,7 @@
 use seq_macro::seq;
 
+use custom_test::custom_test;
+
 seq!(i in 0..=11 {
     #[repr(C)]
     #[derive(Debug)]
@@ -34,7 +36,7 @@ pub type SafeJmpBuf = Mutex<RISCV32RawJumpBuffer>;
 #[allow(unused)]
 pub static JMP_BUF: SafeJmpBuf = Mutex::new(RISCV32RawJumpBuffer::default());
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn setjmp_use_local_test() {
     use core::ptr::{read_volatile, write_volatile};
 
@@ -57,7 +59,7 @@ fn setjmp_use_local_test() {
     }
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn setjmp_use_global_test() {
     use core::ptr::{read_volatile, write_volatile};
 

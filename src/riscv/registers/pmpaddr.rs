@@ -1,11 +1,11 @@
 use super::CSRegister;
 
+use custom_test::custom_test;
+
 macro_rules! make_pmpaddr {
     ($addr_num: expr) => {
         paste::item! {
-            #[derive(Debug, Clone, PartialEq, Default)]
-            pub struct [<PMPAddr $addr_num>] {
-                value: usize,
+            #[derive(Debug, Clone, PartialEq, Default)] pub struct [<PMPAddr $addr_num>] { value: usize,
             }
 
             impl [<PMPAddr $addr_num>] {
@@ -44,7 +44,7 @@ seq!(N in 0..16 {
     make_pmpaddr!(N);
 });
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_method_test() {
     let mut pmpaddr = PMPAddr0::default();
     pmpaddr = pmpaddr.set_addr(0xdeadbeef);
@@ -55,7 +55,7 @@ fn write_method_test() {
 macro_rules! make_pmpaddr_test {
     ($addr_num: expr) => {
         paste::item! {
-            #[test_case]
+            #[custom_test(ModeMachine)]
             fn [<write_pmpaddr_test_ $addr_num>]() {
                 unsafe {
                     [<PMPAddr $addr_num>]::initialize();

@@ -17,7 +17,7 @@ extern "C" {
 mod machine;
 mod riscv;
 mod supervisor;
-mod tests;
+pub mod tests;
 
 extern crate alloc;
 
