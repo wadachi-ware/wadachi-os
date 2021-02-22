@@ -5,23 +5,31 @@ use custom_test::custom_test;
 pub enum TestCondition {
     FirstTest,
     ModeMachine,
+    IntegrationMachineToSupervisor,
     ModeSupervisor,
 }
 
 pub trait Testable {
     fn run(&self) -> bool;
 }
-impl<T> Testable for (T, &'static str)
+impl<T> Testable for (TestCondition, T, &'static str)
 where
     T: Fn(),
 {
     fn run(&self) -> bool {
         match self {
-            (f, n) => {
-                print!("[+] {0: <100} ", n);
-                f();
-                println!("[b] ok");
-            }
+            (c, f, n) => match c {
+                TestCondition::IntegrationMachineToSupervisor => {
+                    println!("[+] Integration test. {}", n);
+                    f();
+                    println!("[b] ok");
+                }
+                _ => {
+                    print!("[+] {0: <100} ", n);
+                    f();
+                    println!("[b] ok");
+                }
+            },
         }
         true
     }
@@ -38,7 +46,7 @@ where
 {
     fn test_if_match(&self, c: TestCondition) -> bool {
         match self() {
-            (p, f, n) if p == c => (f, n).run(),
+            (p, f, n) if p == c => (c, f, n).run(),
             (_, _, _) => false,
         }
     }
@@ -56,6 +64,11 @@ pub fn runner_interface(test_case: &[&dyn TestProvider]) {
         x.test_if_match(TestCondition::ModeMachine);
     }
 
+    println!("[/] Mode switch");
+    for x in test_case {
+        x.test_if_match(TestCondition::IntegrationMachineToSupervisor);
+    }
+
     println!("[/] Testing in Supervisor mode");
     for x in test_case {
         x.test_if_match(TestCondition::ModeSupervisor);
@@ -69,14 +82,4 @@ pub fn runner_interface(test_case: &[&dyn TestProvider]) {
 #[custom_test(FirstTest)]
 fn test_of_test() {
     assert_eq!(1 + 2, 3);
-}
-
-#[custom_test(ModeMachine)]
-fn machine_test() {
-    //
-}
-
-#[custom_test(ModeSupervisor)]
-fn supervisor_test() {
-    //
 }
