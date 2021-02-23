@@ -1,9 +1,7 @@
 #[allow(unused)]
-pub fn ecall() -> ! {
+pub fn ecall() {
+    // not unreachable!!
     unsafe {
         llvm_asm!("ecall");
     }
-
-    unreachable!();
 }
-

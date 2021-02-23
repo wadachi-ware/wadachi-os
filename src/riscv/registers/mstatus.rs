@@ -12,7 +12,7 @@ pub struct MStatus {
 }
 
 #[allow(unused)]
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum MPP {
     User = 0b00,
     Supervisor = 0b01,

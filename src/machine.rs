@@ -58,6 +58,15 @@ pub fn machine_start() -> ! {
     mret::mret();
 }
 
+pub static mut EXCEPTION_HANDLER: Option<fn()> = None;
+
+#[no_mangle]
+extern "C" fn rust_exception_entry() {
+    if let Some(h) = unsafe { EXCEPTION_HANDLER } {
+        h();
+    }
+}
+
 const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;
 // see https://github.com/qemu/qemu/blob/master/hw/riscv/virt.c#L52
 

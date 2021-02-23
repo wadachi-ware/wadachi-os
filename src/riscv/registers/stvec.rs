@@ -2,7 +2,7 @@ use super::CSRegister;
 use bit_field::BitField;
 use custom_test::custom_test;
 
-#[derive(PartialEq, Default, Clone)]
+#[derive(PartialEq, Default, Clone, Debug)]
 pub struct STVec {
     value: usize,
 }

@@ -47,12 +47,14 @@ macro_rules! make_bit_get_set_method {
     };
 }
 
+pub mod mcause;
 pub mod mepc;
 pub mod mstatus;
 pub mod mtvec;
 pub mod pmpaddr;
 pub mod pmpcfg;
 pub mod satp;
+pub mod sepc;
 pub mod stvec;
 
 pub trait CSRegister

@@ -1,60 +1,63 @@
+#![allow(unused)]
+
 use crate::riscv::{
-    helper::setjmp::{longjmp, setjmp, RISCV32RawJumpBuffer},
+    helper::setjmp::{longjmp, setjmp, RISCV32RawJumpBuffer, JMP_BUF},
     instructions::{ecall, mret},
     registers::{
+        mcause::MCause,
         mepc::MEPC,
         mstatus::{MStatus, MPP},
         mtvec::{MTVec, MTVecMode},
         pmpaddr::*,
         pmpcfg::{AddressMatching, PMPCfg},
         satp::{MODE32, SATP},
+        sepc::SEPC,
+        stvec::STVec,
         CSRegister,
     },
 };
 use core::ptr::{read_volatile, write_volatile};
 use custom_test::custom_test;
 
-static mut TEST_JMP_BUFFER: RISCV32RawJumpBuffer = RISCV32RawJumpBuffer::default();
+static mut TEST_SAVED_MPP: Option<MPP> = None;
+
+extern "C" {
+    fn test_exception_handler();
+}
 
 #[custom_test(IntegrationMachineToSupervisor)]
 fn switch_mode_test_from_machine_to_supervisor() {
-    let mut flag = false;
-
-    println!("Switching mode from machine to supervisor");
-    println!("step1: check current mode");
-
-    let ret = unsafe { setjmp(&mut TEST_JMP_BUFFER) };
-    match ret {
-        0 => {
-            assert_eq!(unsafe { read_volatile(&flag) }, false);
-            MTVec::operate(|old| {
-                old.set_addr(jmp_relay_machine as usize)
-                    .set_mode(MTVecMode::Direct)
-            });
-
-            unsafe {
-                write_volatile(&mut flag, true);
-            }
-
-            ecall::ecall();
-        }
-        x if x == MPP::Machine as usize + 10 => {
-            assert_eq!(unsafe { read_volatile(&flag) }, true);
-            println!("In machine mode. step1: ok");
-        }
-        _ => {
-            panic!("unknown setjmp return code in step1");
-        }
+    let x = unsafe { setjmp(&mut JMP_BUF) };
+    if x != 0 {
+        assert_eq!(x, 10);
+        println!("mode switch test, ok. ");
+        return;
     }
 
-    println!("step2: switch mode");
+    unsafe {
+        crate::machine::EXCEPTION_HANDLER = Some(mode_switch_test_handler);
+    }
 
-    MStatus::operate(|old| old.set_mpp(MPP::Supervisor).set_spie(true));
+    println!("step1: check current status. expect M-Mode");
+    assert_eq!(unsafe { TEST_SAVED_MPP }, None);
 
-    MEPC::operate(|old| old.set(for_test_supervisor as usize));
+    MTVec::operate(|old| {
+        old.set_addr(test_exception_handler as usize)
+            .set_mode(MTVecMode::Direct)
+    });
+    ecall::ecall();
 
+    assert_eq!(
+        unsafe { TEST_SAVED_MPP }.expect("exception was not handled"),
+        MPP::Machine
+    );
+
+    println!("[b] step1 -- ok. current cpu status is M-Mode");
+    println!("step2: switch mode to supervisor");
+
+    MStatus::operate(|old| old.set_mpp(MPP::Supervisor));
+    MEPC::operate(|old| old.set(test_supervisor_part as usize));
     SATP::operate(|old| old.set_mode(MODE32::Bare));
-
     PMPCfg::operate(|old| {
         old.rule_operate(0, |rule| {
             rule.set_adr_mth(AddressMatching::TOR)
@@ -63,40 +66,28 @@ fn switch_mode_test_from_machine_to_supervisor() {
                 .set_execute(true)
         })
     });
-
     PMPAddr0::operate(|old| old.set_addr(0xffffffff));
 
     mret::mret();
 }
 
-fn for_test_supervisor() {
-    let mut flag = false;
+fn test_supervisor_part() {
+    println!("mode switched. checking current cpu mode");
+    ecall::ecall();
 
-    println!("mret. check current mode");
-    let ret = unsafe { setjmp(&mut TEST_JMP_BUFFER) };
-    match ret {
-        0 => {
-            assert_eq!(unsafe { read_volatile(&flag) }, false);
-            unsafe {
-                write_volatile(&mut flag, true);
-            }
-            ecall::ecall();
-        }
-        x if x == MPP::Supervisor as usize + 10 => {
-            assert_eq!(unsafe { read_volatile(&flag) }, true);
-            println!("In Supervisor mode. step2: ok");
-        }
-        c => {
-            panic!("unknown setjmp return code in step2. got {}", c);
-        }
-    }
-    println!("mode switching all ok");
+    assert_eq!(
+        unsafe { TEST_SAVED_MPP }.expect("exception was not handled"),
+        MPP::Supervisor,
+    );
+
+    println!("[b] step2 -- ok. current cpu status is S-Mode");
+
+    unsafe { longjmp(&JMP_BUF, 10) };
 }
 
-#[allow(dead_code)]
-fn jmp_relay_machine() -> ! {
+#[no_mangle]
+fn mode_switch_test_handler() {
     unsafe {
-        llvm_asm!(".align 4");
+        TEST_SAVED_MPP = Some(MStatus::read().get_mpp());
     }
-    unsafe { longjmp(&TEST_JMP_BUFFER, MStatus::read().get_mpp() as usize + 10) };
 }

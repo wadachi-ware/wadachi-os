@@ -10,6 +10,11 @@ pub struct MEPC {
 impl MEPC {
     #[allow(unused)]
     #[inline]
+    pub fn get(&self) -> usize {
+        self.value
+    }
+    #[allow(unused)]
+    #[inline]
     pub fn set(mut self, addr: usize) -> Self {
         self.value = addr;
         self
