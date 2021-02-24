@@ -6,8 +6,10 @@ use super::{
     riscv::{
         instructions::{mret, wfi},
         registers::{
+            mcause::MCause,
             mepc::MEPC,
             mstatus::{MStatus, MPP},
+            mtvec::{MTVec, MTVecMode},
             pmpaddr::*,
             pmpcfg::{AddressMatching, PMPCfg},
             satp::{MODE32, SATP},
@@ -16,6 +18,19 @@ use super::{
     },
     supervisor::supervisor_start,
 };
+
+extern "C" {
+    pub static mut HANDLER_POINTER: usize;
+    pub fn test_exception_handler();
+}
+
+fn default_exception_handler() {
+    println!("Exception! type = {:?}", MCause::read().get_trap_type());
+    MEPC::operate(|old| {
+        let t = old.get();
+        old.set(t + 4)
+    });
+}
 
 #[no_mangle]
 #[allow(unreachable_code)]
@@ -39,11 +54,8 @@ pub fn machine_start() -> ! {
     println!("In machine mode");
 
     MStatus::operate(|old| old.set_mpp(MPP::Supervisor));
-
     MEPC::operate(|old| old.set(supervisor_start as usize));
-
     SATP::operate(|old| old.set_mode(MODE32::Bare));
-
     PMPCfg::operate(|old| {
         old.rule_operate(0, |rule| {
             rule.set_adr_mth(AddressMatching::TOR)
@@ -52,19 +64,16 @@ pub fn machine_start() -> ! {
                 .set_execute(true)
         })
     });
-
     PMPAddr0::operate(|old| old.set_addr(0xffffffff));
+    MTVec::operate(|old| {
+        old.set_addr(test_exception_handler as usize)
+            .set_mode(MTVecMode::Direct)
+    });
+    unsafe {
+        HANDLER_POINTER = default_exception_handler as usize;
+    }
 
     mret::mret();
-}
-
-pub static mut EXCEPTION_HANDLER: Option<fn()> = None;
-
-#[no_mangle]
-extern "C" fn rust_exception_entry() {
-    if let Some(h) = unsafe { EXCEPTION_HANDLER } {
-        h();
-    }
 }
 
 const QEMU_VIRTIO_EXIT_ADDRESS: u64 = 0x100000;

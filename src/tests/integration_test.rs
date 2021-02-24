@@ -7,11 +7,13 @@ use crate::riscv::{
         mcause::MCause,
         mepc::MEPC,
         mstatus::{MStatus, MPP},
+        mtval::MTVal,
         mtvec::{MTVec, MTVecMode},
         pmpaddr::*,
         pmpcfg::{AddressMatching, PMPCfg},
         satp::{MODE32, SATP},
         sepc::SEPC,
+        stval::STVal,
         stvec::STVec,
         CSRegister,
     },
@@ -20,10 +22,6 @@ use core::ptr::{read_volatile, write_volatile};
 use custom_test::custom_test;
 
 static mut TEST_SAVED_MPP: Option<MPP> = None;
-
-extern "C" {
-    fn test_exception_handler();
-}
 
 #[custom_test(IntegrationMachineToSupervisor)]
 fn switch_mode_test_from_machine_to_supervisor() {
@@ -34,15 +32,13 @@ fn switch_mode_test_from_machine_to_supervisor() {
         return;
     }
 
-    unsafe {
-        crate::machine::EXCEPTION_HANDLER = Some(mode_switch_test_handler);
-    }
+    unsafe { crate::machine::HANDLER_POINTER = mode_switch_test_handler as usize }
 
     println!("step1: check current status. expect M-Mode");
     assert_eq!(unsafe { TEST_SAVED_MPP }, None);
 
     MTVec::operate(|old| {
-        old.set_addr(test_exception_handler as usize)
+        old.set_addr(crate::machine::test_exception_handler as usize)
             .set_mode(MTVecMode::Direct)
     });
     ecall::ecall();
@@ -90,4 +86,9 @@ fn mode_switch_test_handler() {
     unsafe {
         TEST_SAVED_MPP = Some(MStatus::read().get_mpp());
     }
+
+    MEPC::operate(|old| {
+        let addr = old.get() + 4;
+        old.set(addr)
+    });
 }

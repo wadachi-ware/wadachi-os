@@ -1,6 +1,4 @@
 .option norvc
-
-
 .macro SAVE_REGISTERS_TO_USER_STACK
         addi sp, sp, -256
 
@@ -72,22 +70,26 @@
         addi sp, sp, 256
 .endm
 
+.data
+.global HANDLER_POINTER
+
+HANDLER_POINTER:
+		.word 0
 
 .section .text, "ax",@progbits
 
 .global test_exception_handler
-.global rust_exception_entry
-
 test_exception_handler:
+	.align 2
 	SAVE_REGISTERS_TO_USER_STACK
-	csrr	t0, mepc
-	addi	t0, t0, 4
-	csrw	mepc, t0
-
-	call	rust_exception_entry
+	
+	lla	a0, HANDLER_POINTER
+	lw	a0, 0(a0)
+	jalr	ra, a0, 0
 
 	LOAD_REGISTERS_FROM_USER_STACK
 
 	mret
+
 
 
