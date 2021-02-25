@@ -17,6 +17,7 @@ pub enum TrapType {
 #[allow(unused)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ExceptionType {
+    // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
     InstructionAddressMisaligned = 0,
     InstructionAccessFault = 1,
     IllegalInstruction = 2,
@@ -67,6 +68,7 @@ impl ExceptionType {
 #[allow(unused)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum InterruptType {
+    // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
     UserSoftwareInterrupt = 0,
     SupervisorSoftwareInterrupt = 1,
     // 2: Reserved
@@ -115,6 +117,8 @@ impl MCause {
     #[inline]
     pub fn get_trap_type(&self) -> TrapType {
         match self.value.get_bit(31) {
+            // see p34. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
+            // Check MSB of mcause
             true => {
                 // Interrupt
                 TrapType::Interrupt(match InterruptType::convert(self.value.get_bits(0..32)) {
