@@ -58,9 +58,12 @@ longjmp:
 	LOAD_REGISTER s11, 11
 	LOAD_REGISTER sp, 12
 	LOAD_REGISTER ra, 13
-
+	
+	// a0: return value
+	// a1: argument
+	// see riscv abi ducumentation: https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf
 	seqz			a0, a1
-	add				a0, a0, a1
+	add			a0, a0, a1
 
 	ret
 
