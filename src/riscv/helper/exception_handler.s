@@ -11,7 +11,7 @@
         sw t2, 24(sp)
         sw s0, 28(sp)
         sw s1, 32(sp)
-        sw a0, 36(sp)
+        # sw a0, 36(sp)
         sw a1, 40(sp)
         sw a2, 44(sp)
         sw a3, 48(sp)
@@ -45,7 +45,7 @@
         lw t2, 24(sp)
         lw s0, 28(sp)
         lw s1, 32(sp)
-        lw a0, 36(sp)
+        # lw a0, 36(sp)
         lw a1, 40(sp)
         lw a2, 44(sp)
         lw a3, 48(sp)
@@ -84,9 +84,9 @@ test_exception_handler:
 	.align 2
 	SAVE_REGISTERS_TO_USER_STACK
 	
-	lla	a0, HANDLER_POINTER
-	lw	a0, 0(a0)
-	jalr	ra, a0, 0
+	lla	t0, HANDLER_POINTER
+	lw	t0, 0(t0)
+	jalr	ra, t0, 0
 
 	LOAD_REGISTERS_FROM_USER_STACK
 

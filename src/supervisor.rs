@@ -1,11 +1,11 @@
 use crate::machine::shutdown;
-use crate::riscv::instructions::ecall;
 
 #[allow(unused)]
 pub fn supervisor_start() -> ! {
-    println!("In supervisor mode");
-
-    ecall::ecall();
+    unsafe {
+        llvm_asm!("li   a0, 0");
+        llvm_asm!("ecall");
+    }
 
     println!("Return to supervisor!");
 
