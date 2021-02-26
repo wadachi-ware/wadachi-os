@@ -12,9 +12,7 @@ macro_rules! write_csr {
 #[allow(unused)]
 macro_rules! read_csr {
     ($csr_name: expr) => {
-        #[inline]
-        #[allow(unused)]
-        fn internal_read() -> usize {
+        #[inline] #[allow(unused)] fn internal_read() -> usize {
             let ret;
             unsafe {
                     llvm_asm!(concat!("csrr $0, ", $csr_name) : "=r"(ret)::: "volatile");
@@ -47,11 +45,17 @@ macro_rules! make_bit_get_set_method {
     };
 }
 
+pub mod mcause;
 pub mod mepc;
 pub mod mstatus;
+pub mod mtval;
+pub mod mtvec;
 pub mod pmpaddr;
 pub mod pmpcfg;
 pub mod satp;
+pub mod sepc;
+pub mod stval;
+pub mod stvec;
 
 pub trait CSRegister
 where

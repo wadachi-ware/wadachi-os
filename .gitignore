@@ -2,3 +2,5 @@
 .gdb_history
 rusty-tags.vi
 Cargo.lock
+./src/tests/custom_test/target/*
+./src/tests/custom_test/Cargo.lock

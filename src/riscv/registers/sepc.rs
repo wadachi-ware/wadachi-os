@@ -1,13 +1,12 @@
 use super::CSRegister;
-
 use custom_test::custom_test;
 
 #[derive(Debug, PartialEq, Default, Clone)]
-pub struct MEPC {
+pub struct SEPC {
     // see p42 in https://people.eecs.berkeley.edu/~krste/papers/riscv-privileged-v1.9.1.pdf
     value: usize,
 }
-impl MEPC {
+impl SEPC {
     #[allow(unused)]
     #[inline]
     pub fn get(&self) -> usize {
@@ -21,13 +20,13 @@ impl MEPC {
     }
 }
 
-impl CSRegister for MEPC {
-    unsafe fn write(mepc: Self) {
-        write_csr!("mepc");
-        internal_write(mepc.value);
+impl CSRegister for SEPC {
+    unsafe fn write(sepc: Self) {
+        write_csr!("sepc");
+        internal_write(sepc.value);
     }
     fn read() -> Self {
-        read_csr!("mepc");
+        read_csr!("sepc");
         Self {
             value: internal_read(),
         }
@@ -35,11 +34,11 @@ impl CSRegister for MEPC {
 }
 
 #[custom_test(ModeMachine)]
-fn write_mepc_test() {
+fn write_sepc_test() {
     unsafe {
-        MEPC::initialize();
+        SEPC::initialize();
     }
-    MEPC::operate(|old| old.set(0xdeadbeef));
+    SEPC::operate(|old| old.set(0xdeadbeef));
 
-    assert_eq!(MEPC::read().value, 0xdeadbeef);
+    assert_eq!(SEPC::read().value, 0xdeadbeef);
 }

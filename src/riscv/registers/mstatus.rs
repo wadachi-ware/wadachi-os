@@ -2,6 +2,8 @@ use bit_field::BitField;
 
 use super::CSRegister;
 
+use custom_test::custom_test;
+
 #[allow(unused)]
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct MStatus {
@@ -10,7 +12,7 @@ pub struct MStatus {
 }
 
 #[allow(unused)]
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum MPP {
     User = 0b00,
     Supervisor = 0b01,
@@ -129,7 +131,7 @@ impl CSRegister for MStatus {
     }
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn mpp_write_test() {
     let mut ms = MStatus::default();
     ms = ms.set_mpp(MPP::Supervisor);
@@ -143,7 +145,7 @@ fn mpp_write_test() {
     assert_eq!(ms.get_mpp(), MPP::Machine);
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn write_mstatus_test() {
     unsafe {
         MStatus::initialize();
@@ -158,7 +160,7 @@ fn write_mstatus_test() {
     assert_eq!(MStatus::read().value, 0b1100000000000);
 }
 
-#[test_case]
+#[custom_test(ModeMachine)]
 fn operate_mstatus_test() {
     unsafe {
         MStatus::initialize();
