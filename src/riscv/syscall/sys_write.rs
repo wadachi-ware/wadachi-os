@@ -20,7 +20,7 @@ pub fn sys_write(buffer: *const c_void) {
 
     let text = unsafe { CStr::from_ptr(buffer as *const c_char) };
 
-    println!("{}", text.to_str().unwrap());
+    print!("{}", text.to_str().unwrap());
 }
 
 #[no_mangle]

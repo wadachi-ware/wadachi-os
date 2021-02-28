@@ -25,11 +25,11 @@ pub fn _print(args: core::fmt::Arguments) {
 
 #[macro_export]
 macro_rules! sprint {
-    ($($arg:tt)*) => ($crate::stdio::_print(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::supervisor::syscall_wrapper::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
 macro_rules! sprintln {
-    () => ($crate::print!("\n"));
-    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+    () => ($crate::sprint!("\n"));
+    ($($arg:tt)*) => ($crate::sprint!("{}\n", format_args!($($arg)*)));
 }
