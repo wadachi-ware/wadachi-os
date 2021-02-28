@@ -16,7 +16,6 @@ impl SyscallType {
     pub fn convert(x: usize) -> Option<Self> {
         helper!(x, Write);
 
-        println!("{}", x);
         None
     }
 }
@@ -44,6 +43,8 @@ pub extern "C" fn handle_ecall_from_s(
         }
     }
 
+    // MEPC indicates address that THROWED exception.
+    // so, return address is next to that.
     MEPC::operate(|old| {
         let t = old.get();
         old.set(t + 4)
