@@ -31,7 +31,7 @@ fn write_systemcall_test() {
     #[cfg(test)]
     assert_eq!(unsafe { WRITE_SYSCALL_FLAG }, false);
     unsafe {
-        llvm_asm!("mv   a1, a0":: "r"(test as usize) :: " volatile");
+        llvm_asm!("mv   a1, a0":: "r"(test as usize) :: );
         llvm_asm!("li   a0, 0");
         llvm_asm!("ecall");
     }
