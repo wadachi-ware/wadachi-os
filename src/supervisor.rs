@@ -1,13 +1,13 @@
+#[macro_use]
+pub mod syscall_wrapper;
+
 use crate::machine::shutdown;
 
 #[allow(unused)]
 pub fn supervisor_start() -> ! {
-    unsafe {
-        llvm_asm!("li   a0, 0");
-        llvm_asm!("ecall");
-    }
+    println!("In supervisor mode");
 
-    println!("Return to supervisor!");
+    sprintln!("Hello by syscall 1: Write");
 
     shutdown(0);
 }
