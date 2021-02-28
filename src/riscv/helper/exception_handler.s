@@ -12,6 +12,7 @@
         sw s0, 28(sp)
         sw s1, 32(sp)
         # sw a0, 36(sp)
+        # a0 uses for return value
         sw a1, 40(sp)
         sw a2, 44(sp)
         sw a3, 48(sp)
@@ -46,6 +47,7 @@
         lw s0, 28(sp)
         lw s1, 32(sp)
         # lw a0, 36(sp)
+        # a0 uses for return value
         lw a1, 40(sp)
         lw a2, 44(sp)
         lw a3, 48(sp)
