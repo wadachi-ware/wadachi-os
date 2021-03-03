@@ -1,22 +1,29 @@
 use super::super::registers::{mepc::MEPC, CSRegister};
 
-pub enum SyscallType {
-    Write = 0,
-}
-
-macro_rules! helper {
-    ($x: expr, $member: ident) => {
-        if $x == Self::$member as usize {
-            return Some(Self::$member);
+macro_rules! syscall_types {
+    (
+        pub enum $Typename: ident {
+        $($name:ident = $num:expr, )*
         }
-    };
+    ) => {
+        #[derive(Debug, PartialEq, Clone, Copy)]
+        pub enum $Typename {
+            $($name = $num,)*
+        }
+        impl SyscallType {
+            pub fn from(i: usize) -> Option<Self> {
+                match i {
+                    $($num => Some(Self::$name),)*
+                    _ => None
+                }
+            }
+        }
+    }
 }
 
-impl SyscallType {
-    pub fn convert(x: usize) -> Option<Self> {
-        helper!(x, Write);
-
-        None
+syscall_types! {
+    pub enum SyscallType {
+        Write = 0,
     }
 }
 
@@ -34,12 +41,13 @@ pub extern "C" fn handle_ecall_from_s(
     use super::sys_write::sys_write;
     use core::ffi::c_void;
 
-    match SyscallType::convert(syscall_type) {
+    match SyscallType::from(syscall_type) {
         Some(cst) => match cst {
             SyscallType::Write => sys_write(a1 as *const c_void),
+            _ => unimplemented!("Unimplemented system call."),
         },
         None => {
-            unimplemented!("Unknown system call type!!");
+            unimplemented!("Unknown system call type.");
         }
     }
 

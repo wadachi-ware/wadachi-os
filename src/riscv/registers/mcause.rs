@@ -14,92 +14,68 @@ pub enum TrapType {
     Interrupt(InterruptType),
 }
 
-#[allow(unused)]
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum ExceptionType {
-    // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
-    InstructionAddressMisaligned = 0,
-    InstructionAccessFault = 1,
-    IllegalInstruction = 2,
-    BreakPoint = 3,
-    LoadAddressMisaligned = 4,
-    LoadAccessFault = 5,
-    StoreAMOAddressMisaligned = 6,
-    StoreAMOAccessFault = 7,
-    EnvironmentCallFromUMode = 8,
-    EnvironmentCallFromSMode = 9,
-    // 10: Reserved
-    EnvironmentCallFromMMode = 11,
-    InstructionPageFault = 12,
-    LoadPageFault = 13,
-    // 14: Reserved
-    StoreAMOPageFault = 15,
-}
-
-macro_rules! helper {
-    ($x: ident, $member: ident) => {
-        if $x == Self::$member as usize {
-            return Ok(Self::$member);
+macro_rules! enum_with_from {
+    (
+        pub enum $TypeName: ident {
+            $($name: ident = $num: expr,)*
         }
-    };
-}
-
-impl ExceptionType {
-    fn convert(x: usize) -> Result<ExceptionType, ()> {
-        helper!(x, InstructionAddressMisaligned);
-        helper!(x, InstructionAccessFault);
-        helper!(x, IllegalInstruction);
-        helper!(x, BreakPoint);
-        helper!(x, LoadAddressMisaligned);
-        helper!(x, LoadAccessFault);
-        helper!(x, StoreAMOAddressMisaligned);
-        helper!(x, StoreAMOAccessFault);
-        helper!(x, EnvironmentCallFromUMode);
-        helper!(x, EnvironmentCallFromSMode);
-        helper!(x, EnvironmentCallFromMMode);
-        helper!(x, InstructionPageFault);
-        helper!(x, LoadPageFault);
-        helper!(x, StoreAMOPageFault);
-
-        Err(())
+    ) => {
+        #[allow(unused)]
+        #[derive(Debug, PartialEq, Clone, Copy)]
+        pub enum $TypeName {
+            $($name = $num,)*
+        }
+        impl $TypeName {
+            #[allow(unused)]
+            pub fn from(i: usize) -> Option<Self> {
+                match i {
+                    $($num => Some(Self::$name),)*
+                    _ => None,
+                }
+            }
+        }
     }
 }
 
-#[allow(unused)]
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum InterruptType {
-    // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
-    UserSoftwareInterrupt = 0,
-    SupervisorSoftwareInterrupt = 1,
-    // 2: Reserved
-    MachineSoftwareInterrupt = 3,
-
-    UserTimerInterrupt = 4,
-    SupervisorTimerInterrupt = 5,
-    // 6: Reserved
-    MachineTimerInterrupt = 7,
-
-    UserExternalInterrupt = 8,
-    SupervisorExternalInterrupt = 9,
-    // 10: Reserved
-    MachineExternalInterrupt = 10,
-}
-
-impl InterruptType {
-    fn convert(x: usize) -> Result<InterruptType, ()> {
-        helper!(x, UserSoftwareInterrupt);
-        helper!(x, SupervisorSoftwareInterrupt);
-        helper!(x, MachineSoftwareInterrupt);
-        helper!(x, UserTimerInterrupt);
-        helper!(x, SupervisorTimerInterrupt);
-        helper!(x, MachineTimerInterrupt);
-        helper!(x, UserExternalInterrupt);
-        helper!(x, SupervisorExternalInterrupt);
-        helper!(x, MachineExternalInterrupt);
-
-        Err(())
+enum_with_from!(
+    pub enum ExceptionType {
+        // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
+        InstructionAddressMisaligned = 0,
+        InstructionAccessFault = 1,
+        IllegalInstruction = 2,
+        BreakPoint = 3,
+        LoadAddressMisaligned = 4,
+        LoadAccessFault = 5,
+        StoreAMOAddressMisaligned = 6,
+        StoreAMOAccessFault = 7,
+        EnvironmentCallFromUMode = 8,
+        EnvironmentCallFromSMode = 9,
+        // 10: Reserved
+        EnvironmentCallFromMMode = 11,
+        InstructionPageFault = 12,
+        LoadPageFault = 13,
+        // 14: Reserved
+        StoreAMOPageFault = 15,
     }
-}
+);
+
+enum_with_from!(
+    pub enum InterruptType {
+        // see p35. https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
+        UserSoftwareInterrupt = 0,
+        SupervisorSoftwareInterrupt = 1,
+        // 2: Reserved
+        MachineSoftwareInterrupt = 3,
+        UserTimerInterrupt = 4,
+        SupervisorTimerInterrupt = 5,
+        // 6: Reserved
+        MachineTimerInterrupt = 7,
+        UserExternalInterrupt = 8,
+        SupervisorExternalInterrupt = 9,
+        // 10: Reserved
+        MachineExternalInterrupt = 10,
+    }
+);
 
 impl MCause {
     #[allow(unused)]
@@ -121,16 +97,16 @@ impl MCause {
             // Check MSB of mcause
             true => {
                 // Interrupt
-                TrapType::Interrupt(match InterruptType::convert(self.value.get_bits(0..32)) {
-                    Ok(x) => x,
-                    Err(_) => panic!("Unknown exception code!"),
+                TrapType::Interrupt(match InterruptType::from(self.value.get_bits(0..32)) {
+                    Some(x) => x,
+                    None => panic!("Unknown exception code!"),
                 })
             }
             false => {
                 // Exception
-                TrapType::Exception(match ExceptionType::convert(self.value.get_bits(0..32)) {
-                    Ok(x) => x,
-                    Err(_) => panic!("Unknown interrupt code!"),
+                TrapType::Exception(match ExceptionType::from(self.value.get_bits(0..32)) {
+                    Some(x) => x,
+                    None => panic!("Unknown interrupt code!"),
                 })
             }
         }
