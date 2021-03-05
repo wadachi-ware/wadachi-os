@@ -9,9 +9,11 @@ impl Write for PrintBufferDummy {
         let ptr = cstr.as_ptr();
 
         unsafe {
-            llvm_asm!("mv   a1, a0":: "r"(ptr as usize) ::);
-            llvm_asm!("li   a0, 0");
-            llvm_asm!("ecall");
+            llvm_asm!("
+                mv  a1, a0
+                li  a0, 0
+                ecall
+                " :: "{a0}"(ptr as usize) : "a0" "a1" : "volatile");
         };
 
         Ok(())

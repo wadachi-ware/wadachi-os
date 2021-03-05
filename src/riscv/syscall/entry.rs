@@ -28,6 +28,7 @@ syscall_types! {
 }
 
 #[allow(unused)]
+#[inline(never)]
 pub extern "C" fn handle_ecall_from_s(
     syscall_type: usize,
     a1: usize,
