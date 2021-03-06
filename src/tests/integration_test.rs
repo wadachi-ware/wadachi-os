@@ -1,21 +1,24 @@
 #![allow(unused)]
 
-use crate::riscv::{
-    helper::setjmp::{longjmp, setjmp, RISCV32RawJumpBuffer, JMP_BUF},
-    instructions::{ecall, mret},
-    registers::{
-        mcause::MCause,
-        mepc::MEPC,
-        mstatus::{MStatus, MPP},
-        mtval::MTVal,
-        mtvec::{MTVec, MTVecMode},
-        pmpaddr::*,
-        pmpcfg::{AddressMatching, PMPCfg},
-        satp::{MODE32, SATP},
-        sepc::SEPC,
-        stval::STVal,
-        stvec::STVec,
-        CSRegister,
+use crate::{
+    machine::{default_exception_handler, test_exception_handler, HANDLER_POINTER},
+    riscv::{
+        helper::setjmp::{longjmp, setjmp, RISCV32RawJumpBuffer, JMP_BUF},
+        instructions::{ecall, mret},
+        registers::{
+            mcause::MCause,
+            mepc::MEPC,
+            mstatus::{MStatus, MPP},
+            mtval::MTVal,
+            mtvec::{MTVec, MTVecMode},
+            pmpaddr::*,
+            pmpcfg::{AddressMatching, PMPCfg},
+            satp::{MODE32, SATP},
+            sepc::SEPC,
+            stval::STVal,
+            stvec::STVec,
+            CSRegister,
+        },
     },
 };
 use core::ptr::{read_volatile, write_volatile};
@@ -63,6 +66,10 @@ fn switch_mode_test_from_machine_to_supervisor() {
         })
     });
     PMPAddr0::operate(|old| old.set_addr(0xffffffff));
+    MTVec::operate(|old| {
+        old.set_addr(test_exception_handler as usize)
+            .set_mode(MTVecMode::Direct)
+    });
 
     mret::mret();
 }
@@ -77,6 +84,10 @@ fn test_supervisor_part() {
     );
 
     println!("[b] step2 -- ok. current cpu status is S-Mode");
+
+    unsafe {
+        HANDLER_POINTER = default_exception_handler as usize;
+    }
 
     unsafe { longjmp(&JMP_BUF, 10) };
 }

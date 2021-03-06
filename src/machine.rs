@@ -6,7 +6,7 @@ use super::{
     riscv::{
         instructions::{mret, wfi},
         registers::{
-            mcause::MCause,
+            mcause::{ExceptionType, MCause, TrapType},
             mepc::MEPC,
             mstatus::{MStatus, MPP},
             mtvec::{MTVec, MTVecMode},
@@ -24,12 +24,31 @@ extern "C" {
     pub fn test_exception_handler();
 }
 
-fn default_exception_handler() {
-    println!("Exception! type = {:?}", MCause::read().get_trap_type());
-    MEPC::operate(|old| {
-        let t = old.get();
-        old.set(t + 4)
-    });
+pub extern "C" fn default_exception_handler(
+    a0: usize,
+    a1: usize,
+    a2: usize,
+    a3: usize,
+    a4: usize,
+    a5: usize,
+    a6: usize,
+    a7: usize,
+) -> usize {
+    match MCause::read().get_trap_type() {
+        TrapType::Exception(e) => match e {
+            ExceptionType::EnvironmentCallFromSMode => {
+                crate::riscv::syscall::entry::handle_ecall_from_s(a0, a1, a2, a3, a4, a5, a6, a7);
+            }
+            _ => {
+                println!("Unsupported exception type");
+            }
+        },
+        TrapType::Interrupt(_) => {
+            println!("Interrupt!");
+        }
+    }
+
+    0
 }
 
 #[no_mangle]

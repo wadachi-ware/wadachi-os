@@ -84,9 +84,9 @@ test_exception_handler:
 	.align 2
 	SAVE_REGISTERS_TO_USER_STACK
 	
-	lla	a0, HANDLER_POINTER
-	lw	a0, 0(a0)
-	jalr	ra, a0, 0
+	lla	t0, HANDLER_POINTER
+	lw	t0, 0(t0)
+	jalr	ra, t0, 0
 
 	LOAD_REGISTERS_FROM_USER_STACK
 
