@@ -1,4 +1,5 @@
 use super::CSRegister;
+use super::super::memory::ppn::PPN;
 use bit_field::BitField;
 
 use custom_test::custom_test;
@@ -53,14 +54,13 @@ impl SATP {
     }
     #[allow(unused)]
     #[inline]
-    pub fn get_ppn(&self) -> usize {
-        // TODO: usize --> PPN
-        self.value.get_bits(0..=21)
+    pub fn get_ppn(&self) -> PPN {
+        PPN::from_page(self.value.get_bits(0..=21))
     }
     #[allow(unused)]
     #[inline]
-    pub fn set_ppn(mut self, v: usize) -> Self {
-        self.value.set_bits(0..=21, v);
+    pub fn set_ppn(mut self, ppn: PPN) -> Self {
+        self.value.set_bits(0..=21, ppn.to_page());
         self
     }
 }

@@ -17,6 +17,10 @@ use crate::riscv::{
         stvec::STVec,
         CSRegister,
     },
+    memory::{
+        ppn::PPN,
+        pte::PTE,
+    },
 };
 use core::ptr::{read_volatile, write_volatile};
 use custom_test::custom_test;
@@ -92,3 +96,43 @@ fn mode_switch_test_handler() {
         old.set(addr)
     });
 }
+
+#[custom_test(IntegrationVirtualMemory)]
+fn write_vm_test() {
+
+    let write_address = 0x01000123usize;
+    let read_address  = 0x00000123usize;
+    let value = 100;
+    let ptp_address  = 0x02000000usize;
+
+    unsafe {
+        MStatus::initialize();
+        SATP::initialize();
+    }
+
+    MStatus::operate(|old| old.set_mpp(MPP::Machine));
+
+    unsafe {
+        // write to physical memory
+        let mut wv = write_address as *mut i32;
+        *wv = value;
+
+        // set PTE
+        let mut pte = ptp_address as *mut PTE;
+        *pte = PTE::new(PPN::from_address(read_address));
+        (*pte).set_valid(true);
+        (*pte).set_read(true);
+    }
+
+    // switch to virtual memory mode
+    SATP::operate(|old| old.set_ppn(PPN::from_address(ptp_address)));
+    SATP::operate(|old| old.set_mode(MODE32::Sv32));
+    MStatus::operate(|old| old.set_mpp(MPP::User));
+
+    // read from virtual memory
+    unsafe {
+        let rv = read_address as *const i32;
+        assert_eq!(*rv, value);
+    }
+}
+
