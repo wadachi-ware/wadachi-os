@@ -111,37 +111,43 @@ fn mode_switch_test_handler() {
 #[custom_test(IntegrationVirtualMemory)]
 fn write_vm_test() {
 
-    let write_address = 0xA0000123usize;
-    let read_address  = 0xB0000123usize;
+    let write_address = 0x8001E123usize;
+    let read_address  = 0x00000123usize;
     let value = 100;
-    let ptp_address   = 0x90000000usize;
-
-    // switch M-mode
-    MStatus::operate(|old| old.set_mpp(MPP::Machine));
+    let ptp_address   = 0x8001F000usize;
 
     unsafe {
         // write to physical memory
+        println!("write to physical memory");
         let mut wv = write_address as *mut i32;
-        panic!("!");        *wv = value;
+        *wv = value;
 
         // set PTE
+        println!("set PTE");
         let mut pte = ptp_address as *mut PTE;
-        *pte = PTE::new(PPN::from_address(read_address));
-        (*pte).set_valid(true);
-        (*pte).set_read(true);
+        for i in 0..4096 {
+            *(pte.offset(i)) = PTE::new(PPN::from_address((i << 22).unsigned_abs()));
+            &(*(pte.offset(i)))
+                .set_valid(true)
+                .set_read(true)
+                .set_write(true)
+                .set_execute(true);
+        };
+
+        println!("pte[1] = {:08X}", *((ptp_address + 4) as *const usize));
     }
 
-    panic!("!");
     // switch to virtual memory mode
-    SATP::operate(|old| old.set_ppn(PPN::from_address(ptp_address)));
-    SATP::operate(|old| old.set_mode(MODE32::Sv32));
-    MStatus::operate(|old| old.set_mpp(MPP::User));
+    println!("switch to virtual memory mode");
+    SATP::operate(|old| old
+        .set_ppn(PPN::from_address(ptp_address))
+        .set_mode(MODE32::Sv32));
 
 
     // read from virtual memory
+    println!("read from virtual memory");
     unsafe {
         let rv = read_address as *const i32;
         assert_eq!(*rv, value);
     }
 }
-

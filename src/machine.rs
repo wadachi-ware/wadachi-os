@@ -39,8 +39,8 @@ pub extern "C" fn default_exception_handler(
             ExceptionType::EnvironmentCallFromSMode => {
                 crate::riscv::syscall::entry::handle_ecall_from_s(a0, a1, a2, a3, a4, a5, a6, a7);
             }
-            _ => {
-                println!("Unsupported exception type");
+            e_ => {
+                panic!("Unsupported exception type: {:?}", e_);
             }
         },
         TrapType::Interrupt(_) => {

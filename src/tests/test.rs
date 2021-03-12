@@ -66,10 +66,6 @@ pub fn runner_interface(test_case: &[&dyn TestProvider]) {
         x.test_if_match(TestCondition::ModeMachine);
     }
 
-    for x in test_case {
-        x.test_if_match(TestCondition::IntegrationVirtualMemory);
-    }
-
     println!("[/] Mode switch");
     for x in test_case {
         x.test_if_match(TestCondition::IntegrationMachineToSupervisor);
@@ -78,6 +74,10 @@ pub fn runner_interface(test_case: &[&dyn TestProvider]) {
     println!("[/] Testing in Supervisor mode");
     for x in test_case {
         x.test_if_match(TestCondition::ModeSupervisor);
+    }
+
+    for x in test_case {
+        x.test_if_match(TestCondition::IntegrationVirtualMemory);
     }
 
     println!();
