@@ -1,13 +1,13 @@
+#[macro_use]
+pub mod syscall_wrapper;
+
 use crate::machine::shutdown;
-use crate::riscv::instructions::ecall;
 
 #[allow(unused)]
 pub fn supervisor_start() -> ! {
     println!("In supervisor mode");
 
-    ecall::ecall();
-
-    println!("Return to supervisor!");
+    sprintln!("Hello by syscall 1: Write");
 
     shutdown(0);
 }
