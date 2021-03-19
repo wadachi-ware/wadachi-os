@@ -21,10 +21,12 @@ use crate::{
         },
         memory::{
             ppn::PPN,
-            pte::PTE,
+            pte::{PTE, Attributes},
+            ptp::{PTP4M, PTP4K},
         },
     },
 };
+use bit_field::BitField;
 use core::ptr::{read_volatile, write_volatile};
 use custom_test::custom_test;
 
@@ -111,43 +113,68 @@ fn mode_switch_test_handler() {
 #[custom_test(IntegrationVirtualMemory)]
 fn write_vm_test() {
 
-    let write_address = 0x8001E123usize;
-    let read_address  = 0x00000123usize;
+    let write_addr    = 0x8001E123usize;
+    let read_addr     = 0x8041E123usize;
+    let root_ptp_addr = 0x8001F000usize;
+    let subptp_addr   = 0x80020000usize;
     let value = 100;
-    let ptp_address   = 0x8001F000usize;
+    let megapage_mask = 0xFFC00000usize;
+    let subpage_mask  = 0x003FF000usize;
 
     unsafe {
         // write to physical memory
-        println!("write to physical memory");
-        let mut wv = write_address as *mut i32;
+        let mut wv = write_addr as *mut i32;
         *wv = value;
-
-        // set PTE
-        println!("set PTE");
-        let mut pte = ptp_address as *mut PTE;
-        for i in 0..4096 {
-            *(pte.offset(i)) = PTE::new(PPN::from_address((i << 22).unsigned_abs()));
-            &(*(pte.offset(i)))
-                .set_valid(true)
-                .set_read(true)
-                .set_write(true)
-                .set_execute(true);
-        };
-
-        println!("pte[1] = {:08X}", *((ptp_address + 4) as *const usize));
     }
 
+    // make PTP
+    let root_ptp = PTP4M::make(root_ptp_addr);
+    let sub_ptp = PTP4K::make(subptp_addr);
+    let attrs =
+            Attributes::V |
+            Attributes::R |
+            Attributes::W |
+            Attributes::X;
+
+    for i in 0..1024usize {
+        let addr = i << 22;
+        let ppn = PPN::from_addr(addr); // 4 MB
+
+        root_ptp.set_megapage(addr, &ppn, &attrs);
+    };
+    for i in 0..1024usize {
+        let addr = i << 12;
+        let ppn = PPN::from_addr(addr); // 4 MB
+
+        sub_ptp.set_page(addr, &ppn, &attrs);
+    };
+
+    let megapage_addr = read_addr & megapage_mask;
+    let write_ppn = PPN::from_addr(write_addr & megapage_mask);
+    root_ptp.set_megapage(megapage_addr, &write_ppn, &attrs);
+
     // switch to virtual memory mode
-    println!("switch to virtual memory mode");
     SATP::operate(|old| old
-        .set_ppn(PPN::from_address(ptp_address))
+        .set_ppn(PPN::from_page(root_ptp_addr >> 12))
         .set_mode(MODE32::Sv32));
 
 
-    // read from virtual memory
-    println!("read from virtual memory");
+    // confirm written data
     unsafe {
-        let rv = read_address as *const i32;
+        let rv = read_addr as *const i32;
         assert_eq!(*rv, value);
     }
+    println!("[b] megapage ok.");
+
+    root_ptp.set_subpage(megapage_addr, &sub_ptp);
+    unsafe {
+        let rv = read_addr as *const i32;
+        assert_eq!(*rv, value);
+    }
+    println!("[b] normal page ok.");
+
+
+    // recover mapping
+    let read_ppn = PPN::from_addr(read_addr & megapage_mask);
+    root_ptp.set_megapage(megapage_addr, &read_ppn, &attrs);
 }
