@@ -40,6 +40,7 @@ impl PTP4M {
     }
 
     /// Returns the PTE stored the specified index
+    #[allow(unused)]
     pub fn get(&self, idx: usize) -> PTE {
         self.entries[idx]
     }
@@ -86,6 +87,7 @@ impl PTP4K {
     }
 
     /// Returns the PTE stored the specified index
+    #[allow(unused)]
     pub fn get(&self, idx: usize) -> PTE {
         self.entries[idx]
     }
