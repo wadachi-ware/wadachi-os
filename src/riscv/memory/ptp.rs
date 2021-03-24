@@ -41,8 +41,8 @@ impl PTP4M {
 
     /// Returns the PTE stored the specified index
     #[allow(unused)]
-    pub fn get(&self, idx: usize) -> PTE {
-        self.entries[idx]
+    pub fn get(&self, addr: usize) -> PTE {
+        self.entries[vpn1(addr)]
     }
 
     /// Sets the specified address megapage which starts by the specified PPN
@@ -88,8 +88,8 @@ impl PTP4K {
 
     /// Returns the PTE stored the specified index
     #[allow(unused)]
-    pub fn get(&self, idx: usize) -> PTE {
-        self.entries[idx]
+    pub fn get(&self, addr: usize) -> PTE {
+        self.entries[vpn0(addr)]
     }
 
     /// Sets to distribute the specified address on the subpage
