@@ -20,6 +20,8 @@ mod supervisor;
 pub mod tests;
 
 extern crate alloc;
+extern crate bitflags;
+
 
 use machine::*;
 

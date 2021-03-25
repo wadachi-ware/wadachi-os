@@ -5,8 +5,9 @@ use custom_test::custom_test;
 pub enum TestCondition {
     FirstTest,
     ModeMachine,
-    IntegrationMachineToSupervisor,
     ModeSupervisor,
+    IntegrationMachineToSupervisor,
+    IntegrationVirtualMemory,
 }
 
 pub trait Testable {
@@ -19,7 +20,8 @@ where
     fn run(&self) -> bool {
         match self {
             (c, f, n) => match c {
-                TestCondition::IntegrationMachineToSupervisor => {
+                TestCondition::IntegrationMachineToSupervisor |
+                TestCondition::IntegrationVirtualMemory => {
                     println!("[+] Integration test. {}", n);
                     f();
                     println!("[b] ok");
@@ -72,6 +74,10 @@ pub fn runner_interface(test_case: &[&dyn TestProvider]) {
     println!("[/] Testing in Supervisor mode");
     for x in test_case {
         x.test_if_match(TestCondition::ModeSupervisor);
+    }
+
+    for x in test_case {
+        x.test_if_match(TestCondition::IntegrationVirtualMemory);
     }
 
     println!();
